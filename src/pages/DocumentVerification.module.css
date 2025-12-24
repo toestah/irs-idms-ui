@@ -1,0 +1,355 @@
+.page {
+  padding: var(--spacing-lg) var(--spacing-xl);
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.header {
+  margin-bottom: var(--spacing-lg);
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  color: var(--color-primary-dark);
+  font-size: 14px;
+  margin-bottom: var(--spacing-md);
+  text-decoration: none;
+}
+
+.backLink:hover {
+  text-decoration: underline;
+}
+
+.header h1 {
+  color: var(--color-primary-dark);
+  margin-bottom: var(--spacing-xs);
+}
+
+.header > p {
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-lg);
+}
+
+.panelHeader {
+  margin-bottom: var(--spacing-lg);
+}
+
+.panelHeader h2 {
+  font-size: 18px;
+  margin-bottom: var(--spacing-xs);
+}
+
+.panelHeader p {
+  font-size: 14px;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+/* Data Panel */
+.fieldsTable {
+  margin-bottom: var(--spacing-lg);
+}
+
+.tableHeader {
+  display: grid;
+  grid-template-columns: 140px 1fr 100px 50px;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background-color: var(--color-bg-primary);
+  border-bottom: 1px solid var(--color-border);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.tableRow {
+  display: grid;
+  grid-template-columns: 140px 1fr 100px 50px;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  border-bottom: 1px solid var(--color-border);
+  align-items: center;
+}
+
+.tableRow:last-child {
+  border-bottom: none;
+}
+
+.fieldName {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.fieldValue {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.fieldConfidence {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.fieldAction {
+  display: flex;
+  justify-content: center;
+}
+
+.editButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.editButton:hover {
+  background-color: var(--color-bg-primary);
+  color: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+}
+
+.editGroup {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+}
+
+.editInput {
+  flex: 1;
+  height: 34px;
+  padding: 0 var(--spacing-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  outline: none;
+}
+
+.editInput:focus {
+  border-color: var(--color-primary-dark);
+}
+
+.confidenceLegend {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-md);
+  background-color: var(--color-bg-primary);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.legendTitle {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.legendItems {
+  display: flex;
+  gap: var(--spacing-lg);
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.legendDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.legendDot.high {
+  background-color: var(--color-success);
+}
+
+.legendDot.medium {
+  background-color: var(--color-warning);
+}
+
+.legendDot.low {
+  background-color: var(--color-danger);
+}
+
+.actions {
+  display: flex;
+  gap: var(--spacing-md);
+}
+
+.actions button:first-child {
+  flex: 1;
+}
+
+/* Document Preview */
+.documentPreview {
+  background-color: var(--color-bg-primary);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+}
+
+.documentFrame {
+  background-color: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-lg);
+  font-size: 12px;
+}
+
+.documentHeader {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-lg);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.documentHeader span:first-child {
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.documentLink {
+  color: var(--color-info);
+  font-size: 10px;
+}
+
+.documentBody {
+  line-height: 1.6;
+}
+
+.petitionerRow,
+.vsRow,
+.commissionerRow,
+.respondentRow {
+  margin-bottom: var(--spacing-xs);
+}
+
+.docketLabel {
+  float: right;
+  font-size: 10px;
+  color: var(--color-text-muted);
+}
+
+.vsRow {
+  padding-left: var(--spacing-xl);
+}
+
+.respondentRow {
+  padding-left: var(--spacing-2xl);
+  margin-bottom: var(--spacing-lg);
+}
+
+.formTitle {
+  text-align: center;
+  margin-bottom: var(--spacing-lg);
+  padding: var(--spacing-md) 0;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.formTitle h3 {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-bottom: var(--spacing-xs);
+}
+
+.formTitle p {
+  font-size: 10px;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.formFields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.formField label {
+  display: block;
+  font-size: 10px;
+  color: var(--color-text-muted);
+  margin-bottom: var(--spacing-xs);
+}
+
+.highlightedValue {
+  background-color: #fef08a;
+  padding: 2px 4px;
+  display: inline-block;
+  font-weight: 500;
+}
+
+.formNote {
+  font-size: 10px;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+  margin-bottom: var(--spacing-lg);
+}
+
+.formSignatures {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--color-border);
+}
+
+.signatureLine {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+}
+
+.documentFooter {
+  margin-top: var(--spacing-lg);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--color-border);
+  font-size: 10px;
+  color: var(--color-text-muted);
+  text-align: right;
+}
+
+.previewFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  color: var(--color-text-muted);
+}
+
+.previewMeta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+@media (max-width: 1200px) {
+  .content {
+    grid-template-columns: 1fr;
+  }
+}

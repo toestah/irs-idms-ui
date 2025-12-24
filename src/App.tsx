@@ -1,35 +1,35 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { MainLayout } from './layouts/MainLayout';
+import {
+  Dashboard,
+  SearchResults,
+  MatterDetail,
+  DocumentQueue,
+  DocumentVerification,
+} from './pages';
+import './App.css';
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<MainLayout />}>
+          <Route index element={<Dashboard />} />
+          <Route path="search" element={<SearchResults />} />
+          <Route path="matters/:id" element={<MatterDetail />} />
+          <Route path="document-queue" element={<DocumentQueue />} />
+          <Route path="verification/:id" element={<DocumentVerification />} />
+          {/* Placeholder routes for future pages */}
+          <Route path="matters" element={<Dashboard />} />
+          <Route path="documents" element={<Dashboard />} />
+          <Route path="verification" element={<DocumentQueue />} />
+          <Route path="reports" element={<Dashboard />} />
+          <Route path="settings" element={<Dashboard />} />
+          <Route path="help" element={<Dashboard />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;

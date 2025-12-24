@@ -1,0 +1,406 @@
+.page {
+  padding: var(--spacing-lg);
+}
+
+.matterHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg);
+  background-color: var(--color-bg-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.matterIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background-color: var(--color-primary-dark);
+  border-radius: var(--radius-md);
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.matterInfo {
+  flex: 1;
+}
+
+.matterInfo h1 {
+  font-size: 18px;
+  margin-bottom: var(--spacing-xs);
+}
+
+.matterInfo p {
+  font-size: 14px;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.matterActions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.userAvatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background-color: var(--color-bg-primary);
+  border: 2px solid var(--color-border);
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.content {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: var(--spacing-lg);
+}
+
+.mainColumn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.searchCard {
+  background-color: var(--color-bg-secondary);
+  border-color: var(--color-border-light);
+  padding: var(--spacing-lg);
+}
+
+.searchLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  color: var(--color-primary-dark);
+  font-weight: 500;
+  margin-bottom: var(--spacing-md);
+}
+
+.searchForm {
+  position: relative;
+}
+
+.searchInput {
+  width: 100%;
+  height: 50px;
+  padding: var(--spacing-md) 56px var(--spacing-md) var(--spacing-md);
+  background-color: var(--color-bg-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 16px;
+  outline: none;
+}
+
+.searchInput:focus {
+  border-color: var(--color-primary-dark);
+}
+
+.searchButton {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-primary-dark);
+  border: none;
+  border-radius: var(--radius-md);
+  color: white;
+  cursor: pointer;
+}
+
+.infoCards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-lg);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-md);
+}
+
+.cardTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.cardTitle h2 {
+  font-size: 16px;
+}
+
+.strategyTitle {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: var(--spacing-sm);
+}
+
+.strategyText {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-md);
+}
+
+.tags {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.tag {
+  padding: 4px 12px;
+  background-color: var(--color-info-light);
+  color: var(--color-info);
+  border-radius: var(--radius-full);
+  font-size: 14px;
+}
+
+.teamList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.teamMember {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.memberAvatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: white;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.memberInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.memberName {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.memberRole {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.recentFiles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-md);
+}
+
+.recentFile {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background-color: var(--color-bg-primary);
+  border-radius: var(--radius-md);
+}
+
+.fileIcon {
+  color: var(--color-text-muted);
+}
+
+.fileInfo {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.fileName {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fileTime {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.workspaceHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.workspaceHeader h2 {
+  font-size: 16px;
+  margin-bottom: var(--spacing-xs);
+}
+
+.workspaceHeader p {
+  font-size: 14px;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.workspaceLabel {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--spacing-md);
+}
+
+.folderGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-md);
+}
+
+.folderCard {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  cursor: pointer;
+}
+
+.folderIcon {
+  color: var(--color-primary-dark);
+}
+
+.folderInfo {
+  flex: 1;
+}
+
+.folderName {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.folderCount {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.folderChevron {
+  color: var(--color-text-muted);
+}
+
+/* Side Column */
+.sideColumn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.sectionIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background-color: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  color: var(--color-primary-dark);
+  margin-bottom: var(--spacing-sm);
+}
+
+.fileSections {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.sectionCard {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  cursor: pointer;
+}
+
+.sectionCard:hover {
+  background-color: var(--color-bg-primary);
+}
+
+.sectionInfo {
+  flex: 1;
+}
+
+.sectionName {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.sectionCount {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.sectionChevron {
+  color: var(--color-text-muted);
+}
+
+.archivalSection {
+  margin-top: var(--spacing-lg);
+}
+
+.archivalLabel {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--spacing-md);
+}
+
+.archivalEmpty {
+  font-size: 14px;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+@media (max-width: 1024px) {
+  .content {
+    grid-template-columns: 1fr;
+  }
+
+  .infoCards {
+    grid-template-columns: 1fr;
+  }
+
+  .recentFiles {
+    grid-template-columns: 1fr;
+  }
+}
