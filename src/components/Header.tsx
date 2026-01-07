@@ -1,6 +1,7 @@
 import { Search, User } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import styles from './Header.module.css';
+import irsLogo from '../assets/IRS_Logo.svg';
 
 interface HeaderProps {
   onSearch?: (query: string) => void;
@@ -22,16 +23,13 @@ export function Header({ onSearch }: HeaderProps) {
 
   return (
     <header className={styles.header}>
-      <div className={styles.logo}>
-        <svg width="40" height="34" viewBox="0 0 40 34" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="20" cy="17" r="16" stroke="white" strokeWidth="2" fill="none"/>
-          <text x="20" y="22" textAnchor="middle" fill="white" fontSize="12" fontWeight="bold">IRS</text>
-        </svg>
+      <Link to="/" className={styles.logo}>
+        <img src={irsLogo} alt="IRS Logo" className={styles.logoImage} />
         <div className={styles.logoText}>
           <span className={styles.logoTitle}>Intelligent Document</span>
           <span className={styles.logoSubtitle}>Management System</span>
         </div>
-      </div>
+      </Link>
 
       <form className={styles.searchForm} onSubmit={handleSearch}>
         <input
