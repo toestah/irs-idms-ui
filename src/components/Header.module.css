@@ -12,6 +12,12 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  text-decoration: none; /* Ensure link doesn't underline text */
+}
+
+.logoImage {
+  height: 40px;
+  width: auto;
 }
 
 .logoText {
