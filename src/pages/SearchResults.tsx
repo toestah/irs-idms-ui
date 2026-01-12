@@ -213,9 +213,9 @@ export function SearchResults() {
               // Extract data from nested structure
               const derivedData = result.document?.derivedStructData;
               const title = derivedData?.title || result.title || 'Untitled Document';
-              const snippet = derivedData?.snippet || derivedData?.snippets?.[0] || result.snippet || '';
+              const snippet = derivedData?.snippets?.[0] || result.snippet || '';
               const documentUrl = derivedData?.link || result.url;
-              const docId = result.document?.id || result.id;
+              const docId = result.id;
 
               return (
                 <Card
