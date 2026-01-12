@@ -135,8 +135,33 @@ export function SearchResults() {
 
   // Handle result click - navigate to matter detail
   const handleResultClick = (result: SearchResult) => {
-    const docketNumber = result.metadata?.docket_number || result.id;
-    navigate(`/matters/${encodeURIComponent(docketNumber)}`);
+    // Try to find an identifier from various sources
+    const derivedData = result.document?.derivedStructData;
+    const documentId = derivedData?.title  // Often contains the doc ID like "0304-J"
+      || result.metadata?.docket_number
+      || result.id
+      || extractIdFromUrl(derivedData?.link);
+
+    if (documentId) {
+      navigate(`/matters/${encodeURIComponent(documentId)}`);
+    }
+  };
+
+  // Extract document ID from URL if available
+  const extractIdFromUrl = (url: string | undefined): string | undefined => {
+    if (!url) return undefined;
+    try {
+      const urlObj = new URL(url);
+      const pathname = urlObj.pathname;
+      const filename = pathname.split('/').pop();
+      if (filename) {
+        // Remove extension and return
+        return filename.replace(/\.[^.]+$/, '');
+      }
+    } catch {
+      // Invalid URL
+    }
+    return undefined;
   };
 
   // Handle pagination
