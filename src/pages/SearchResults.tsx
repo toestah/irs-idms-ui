@@ -209,68 +209,77 @@ export function SearchResults() {
       {!isLoading && results?.search_results && (
         <>
           <div className={styles.results}>
-            {results.search_results.map((result) => (
-              <Card
-                key={result.id}
-                className={styles.resultCard}
-                padding="lg"
-              >
-                <div className={styles.resultHeader}>
-                  <div className={styles.resultTitle}>
-                    <h3>{result.title}</h3>
-                    {result.metadata?.document_type && (
-                      <Badge variant="info">
-                        {result.metadata.document_type}
-                      </Badge>
-                    )}
+            {results.search_results.map((result) => {
+              // Extract data from nested structure
+              const derivedData = result.document?.derivedStructData;
+              const title = derivedData?.title || result.title || 'Untitled Document';
+              const snippet = derivedData?.snippet || derivedData?.snippets?.[0] || result.snippet || '';
+              const documentUrl = derivedData?.link || result.url;
+              const docId = result.document?.id || result.id;
+
+              return (
+                <Card
+                  key={docId}
+                  className={styles.resultCard}
+                  padding="lg"
+                >
+                  <div className={styles.resultHeader}>
+                    <div className={styles.resultTitle}>
+                      <h3>{title}</h3>
+                      {result.metadata?.document_type && (
+                        <Badge variant="info">
+                          {result.metadata.document_type}
+                        </Badge>
+                      )}
+                    </div>
+                    <ChevronRight size={20} className={styles.chevron} />
                   </div>
-                  <ChevronRight size={20} className={styles.chevron} />
-                </div>
 
-                {result.metadata?.docket_number && (
-                  <p className={styles.caseNumber}>
-                    Docket: {result.metadata.docket_number}
-                  </p>
-                )}
+                  {result.metadata?.docket_number && (
+                    <p className={styles.caseNumber}>
+                      Docket: {result.metadata.docket_number}
+                    </p>
+                  )}
 
-                <p className={styles.snippet}>{result.snippet}</p>
+                  <p className={styles.snippet}>{snippet}</p>
 
-                <div className={styles.resultMeta}>
                   {result.metadata?.filed_date && (
-                    <span>Filed: {result.metadata.filed_date}</span>
+                    <div className={styles.resultMeta}>
+                      <span>Filed: {result.metadata.filed_date}</span>
+                      {result.metadata?.filed_by && (
+                        <span>By: {result.metadata.filed_by}</span>
+                      )}
+                    </div>
                   )}
-                  {result.metadata?.filed_by && (
-                    <span>By: {result.metadata.filed_by}</span>
-                  )}
-                </div>
 
-                <div className={styles.resultActions}>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    icon={<FileText size={14} />}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (result.url) {
-                        window.open(result.url, '_blank');
-                      }
-                    }}
-                  >
-                    View Document
-                  </Button>
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleResultClick(result);
-                    }}
-                  >
-                    View Matter
-                  </Button>
-                </div>
-              </Card>
-            ))}
+                  <div className={styles.resultActions}>
+                    {documentUrl && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        icon={<FileText size={14} />}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          window.open(documentUrl, '_blank');
+                        }}
+                      >
+                        View Document
+                      </Button>
+                    )}
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleResultClick(result);
+                      }}
+                    >
+                      View Details
+                    </Button>
+                  </div>
+                </Card>
+              );
+            })}
           </div>
 
           {/* Pagination */}
