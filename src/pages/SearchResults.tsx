@@ -4,7 +4,7 @@ import {
   ArrowLeft,
   FileText,
   ChevronRight,
-  Filter,
+  // Filter, // Hidden until backend supports /api/filters
   Loader2,
   AlertCircle,
   Sparkles,
@@ -23,13 +23,13 @@ export function SearchResults() {
   // Search state from hook
   const {
     results,
-    filters,
+    // filters, // Not yet available on backend
     answer,
     isLoading,
     isLoadingAnswer,
     error,
     performSearch,
-    loadFilters,
+    // loadFilters, // Not yet available on backend
     getAnswer,
     clearError,
   } = useSearch();
@@ -40,13 +40,11 @@ export function SearchResults() {
   const [showFilters, setShowFilters] = useState(false);
   const [showAiAnswer, setShowAiAnswer] = useState(false);
 
-  // Load filters on mount (non-blocking - filters are optional)
-  useEffect(() => {
-    loadFilters().catch(() => {
-      // Filters endpoint may not be available - continue without filters
-      console.log('Filters not available - continuing without filter options');
-    });
-  }, [loadFilters]);
+  // Note: /api/filters endpoint not yet available on backend
+  // Filters will be enabled once backend supports this endpoint
+  // useEffect(() => {
+  //   loadFilters();
+  // }, [loadFilters]);
 
   // Perform search when query changes
   useEffect(() => {
@@ -142,6 +140,7 @@ export function SearchResults() {
             </p>
           </div>
           <div className={styles.headerActions}>
+            {/* Filters button hidden until backend supports /api/filters
             <Button
               variant="outline"
               icon={<Filter size={16} />}
@@ -149,6 +148,7 @@ export function SearchResults() {
             >
               Filters{activeFilterCount > 0 && ` (${activeFilterCount})`}
             </Button>
+            */}
             <Button
               variant="secondary"
               icon={<Sparkles size={16} />}
