@@ -61,7 +61,7 @@ export async function followUp(params: {
  * Stream search conversation via Server-Sent Events
  * Returns an EventSource for real-time updates
  */
-export function streamConversation(params: {
+export function streamConversation(_params: {
   query: string;
   session_id?: string;
   user_id?: string;

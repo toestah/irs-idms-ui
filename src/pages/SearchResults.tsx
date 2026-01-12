@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { Card, Button, Badge } from '../components';
 import { useSearch } from '../hooks';
-import type { SearchResult, FiltersResponse } from '../services/api';
+import type { SearchResult } from '../services/api';
 import styles from './SearchResults.module.css';
 
 export function SearchResults() {
