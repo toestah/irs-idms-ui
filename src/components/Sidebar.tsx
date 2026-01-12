@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -10,6 +11,7 @@ import {
   Settings,
   HelpCircle,
   ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import styles from './Sidebar.module.css';
 
@@ -31,12 +33,18 @@ const mainNavItems: NavItem[] = [
 ];
 
 export function Sidebar() {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
   return (
-    <aside className={styles.sidebar}>
+    <aside className={`${styles.sidebar} ${isCollapsed ? styles.collapsed : ''}`}>
       <nav className={styles.navigation}>
-        <button className={styles.menuButton}>
+        <button 
+          className={styles.menuButton} 
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
           <span>Menu</span>
-          <ChevronLeft size={20} />
+          {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
         </button>
 
         <ul className={styles.navList}>

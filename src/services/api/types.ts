@@ -42,12 +42,18 @@ export interface SearchRequest {
   is_followUp?: boolean;
 }
 
+export interface DerivedStructData {
+  link?: string;
+  title?: string;
+  snippets?: string[];
+  extractive_segments?: Array<{
+    content: string;
+    page_number?: string;
+  }>;
+}
+
 export interface SearchResultDocument {
-  derivedStructData?: {
-    link?: string;
-    title?: string;
-    snippets?: string[];
-  };
+  derivedStructData?: DerivedStructData;
 }
 
 export interface SearchResultMetadata {

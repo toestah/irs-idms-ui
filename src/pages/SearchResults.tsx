@@ -16,6 +16,7 @@ import {
 import { Card, Button, Badge } from '../components';
 import { useSearch } from '../hooks';
 import type { SearchResult } from '../services/api';
+import { extractIdFromUrl, extractDocumentName } from '../utils/documentUtils';
 import styles from './SearchResults.module.css';
 
 /**
@@ -48,37 +49,7 @@ function cleanSnippet(text: string): string {
   return cleaned;
 }
 
-/**
- * Extract a meaningful document name from URL or title
- */
-function extractDocumentName(url: string | undefined, title: string): string {
-  // If title looks like a proper name (not just an ID like "0304-J"), use it
-  if (title && !/^\d{4}-[A-Z]$/.test(title) && title.length > 10) {
-    return title;
-  }
 
-  // Try to extract filename from URL
-  if (url) {
-    try {
-      const urlObj = new URL(url);
-      const pathname = urlObj.pathname;
-      const filename = pathname.split('/').pop();
-      if (filename) {
-        // Remove file extension and decode
-        const name = decodeURIComponent(filename.replace(/\.[^.]+$/, ''));
-        // Convert underscores/hyphens to spaces for readability
-        const readable = name.replace(/[_-]/g, ' ');
-        if (readable.length > 5) {
-          return readable;
-        }
-      }
-    } catch {
-      // Invalid URL, continue with fallback
-    }
-  }
-
-  return title || 'Document';
-}
 
 export function SearchResults() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -147,22 +118,7 @@ export function SearchResults() {
     }
   };
 
-  // Extract document ID from URL if available
-  const extractIdFromUrl = (url: string | undefined): string | undefined => {
-    if (!url) return undefined;
-    try {
-      const urlObj = new URL(url);
-      const pathname = urlObj.pathname;
-      const filename = pathname.split('/').pop();
-      if (filename) {
-        // Remove extension and return
-        return filename.replace(/\.[^.]+$/, '');
-      }
-    } catch {
-      // Invalid URL
-    }
-    return undefined;
-  };
+
 
   // Handle pagination
   const handleNextPage = () => {
@@ -216,15 +172,17 @@ export function SearchResults() {
 
       {/* Error Display */}
       {error && (
-        <Card className={styles.errorCard} padding="md">
-          <div className={styles.errorContent}>
-            <AlertCircle size={20} />
-            <span>{error}</span>
-            <Button variant="ghost" size="sm" onClick={clearError}>
-              Dismiss
-            </Button>
-          </div>
-        </Card>
+        <div aria-live="polite" className={styles.errorContainer}>
+          <Card className={styles.errorCard} padding="md">
+            <div className={styles.errorContent}>
+              <AlertCircle size={20} />
+              <span>{error}</span>
+              <Button variant="ghost" size="sm" onClick={clearError}>
+                Dismiss
+              </Button>
+            </div>
+          </Card>
+        </div>
       )}
 
       {/* AI Answer Section */}
