@@ -34,10 +34,10 @@ export function SearchResults() {
     clearError,
   } = useSearch();
 
-  // Local filter state
-  const [selectedDocTypes, setSelectedDocTypes] = useState<string[]>([]);
-  const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
-  const [showFilters, setShowFilters] = useState(false);
+  // Local filter state (disabled until backend supports /api/filters)
+  // const [selectedDocTypes, setSelectedDocTypes] = useState<string[]>([]);
+  // const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
+  // const [showFilters, setShowFilters] = useState(false);
   const [showAiAnswer, setShowAiAnswer] = useState(false);
 
   // Note: /api/filters endpoint not yet available on backend
@@ -51,33 +51,11 @@ export function SearchResults() {
     if (query) {
       performSearch({
         query,
-        document_type: selectedDocTypes.length > 0 ? selectedDocTypes : undefined,
-        filed_by_role: selectedRoles.length > 0 ? selectedRoles : undefined,
         page: 1,
         page_size: 20,
       });
     }
-  }, [query, selectedDocTypes, selectedRoles, performSearch]);
-
-  // Handle filter changes
-  const handleDocTypeToggle = (docType: string) => {
-    setSelectedDocTypes((prev) =>
-      prev.includes(docType)
-        ? prev.filter((t) => t !== docType)
-        : [...prev, docType]
-    );
-  };
-
-  const handleRoleToggle = (role: string) => {
-    setSelectedRoles((prev) =>
-      prev.includes(role) ? prev.filter((r) => r !== role) : [...prev, role]
-    );
-  };
-
-  const clearFilters = () => {
-    setSelectedDocTypes([]);
-    setSelectedRoles([]);
-  };
+  }, [query, performSearch]);
 
   // Handle AI answer generation
   const handleGetAnswer = async () => {
@@ -101,8 +79,6 @@ export function SearchResults() {
     if (results?.pagination?.next_page_token) {
       performSearch({
         query,
-        document_type: selectedDocTypes.length > 0 ? selectedDocTypes : undefined,
-        filed_by_role: selectedRoles.length > 0 ? selectedRoles : undefined,
         page_token: results.pagination.next_page_token,
         page_size: 20,
       });
@@ -113,16 +89,12 @@ export function SearchResults() {
     if (results?.pagination?.has_previous && results.pagination.current_page > 1) {
       performSearch({
         query,
-        document_type: selectedDocTypes.length > 0 ? selectedDocTypes : undefined,
-        filed_by_role: selectedRoles.length > 0 ? selectedRoles : undefined,
         page: results.pagination.current_page - 1,
         page_size: 20,
         use_offset: true,
       });
     }
   };
-
-  const activeFilterCount = selectedDocTypes.length + selectedRoles.length;
 
   return (
     <div className={styles.page}>
@@ -140,15 +112,6 @@ export function SearchResults() {
             </p>
           </div>
           <div className={styles.headerActions}>
-            {/* Filters button hidden until backend supports /api/filters
-            <Button
-              variant="outline"
-              icon={<Filter size={16} />}
-              onClick={() => setShowFilters(!showFilters)}
-            >
-              Filters{activeFilterCount > 0 && ` (${activeFilterCount})`}
-            </Button>
-            */}
             <Button
               variant="secondary"
               icon={<Sparkles size={16} />}
@@ -170,60 +133,6 @@ export function SearchResults() {
             <Button variant="ghost" size="sm" onClick={clearError}>
               Dismiss
             </Button>
-          </div>
-        </Card>
-      )}
-
-      {/* Filters Panel */}
-      {showFilters && filters && (
-        <Card className={styles.filtersPanel} padding="md">
-          <div className={styles.filterHeader}>
-            <h3>Filters</h3>
-            {activeFilterCount > 0 && (
-              <Button variant="ghost" size="sm" onClick={clearFilters}>
-                Clear all
-              </Button>
-            )}
-          </div>
-          <div className={styles.filterGroups}>
-            {filters.document_types?.length > 0 && (
-              <div className={styles.filterGroup}>
-                <h4>Document Type</h4>
-                <div className={styles.filterChips}>
-                  {filters.document_types.map((docType) => (
-                    <button
-                      key={docType}
-                      className={`${styles.filterChip} ${
-                        selectedDocTypes.includes(docType) ? styles.active : ''
-                      }`}
-                      onClick={() => handleDocTypeToggle(docType)}
-                    >
-                      {docType}
-                      {selectedDocTypes.includes(docType) && <X size={12} />}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-            {filters.filed_by_roles?.length > 0 && (
-              <div className={styles.filterGroup}>
-                <h4>Filed By</h4>
-                <div className={styles.filterChips}>
-                  {filters.filed_by_roles.map((role) => (
-                    <button
-                      key={role}
-                      className={`${styles.filterChip} ${
-                        selectedRoles.includes(role) ? styles.active : ''
-                      }`}
-                      onClick={() => handleRoleToggle(role)}
-                    >
-                      {role}
-                      {selectedRoles.includes(role) && <X size={12} />}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         </Card>
       )}
