@@ -40,9 +40,12 @@ export function SearchResults() {
   const [showFilters, setShowFilters] = useState(false);
   const [showAiAnswer, setShowAiAnswer] = useState(false);
 
-  // Load filters on mount
+  // Load filters on mount (non-blocking - filters are optional)
   useEffect(() => {
-    loadFilters();
+    loadFilters().catch(() => {
+      // Filters endpoint may not be available - continue without filters
+      console.log('Filters not available - continuing without filter options');
+    });
   }, [loadFilters]);
 
   // Perform search when query changes
