@@ -9,11 +9,76 @@ import {
   AlertCircle,
   Sparkles,
   X,
+  Calendar,
+  User,
+  Hash,
 } from 'lucide-react';
 import { Card, Button, Badge } from '../components';
 import { useSearch } from '../hooks';
 import type { SearchResult } from '../services/api';
 import styles from './SearchResults.module.css';
+
+/**
+ * Decode HTML entities in text (e.g., &nbsp;, &#39;, &amp;)
+ */
+function decodeHtmlEntities(text: string): string {
+  const textarea = document.createElement('textarea');
+  textarea.innerHTML = text;
+  return textarea.value;
+}
+
+/**
+ * Clean up snippet text - decode entities, clean up formatting
+ */
+function cleanSnippet(text: string): string {
+  if (!text) return '';
+
+  // Decode HTML entities
+  let cleaned = decodeHtmlEntities(text);
+
+  // Replace multiple spaces with single space
+  cleaned = cleaned.replace(/\s+/g, ' ');
+
+  // Clean up ellipsis patterns (multiple dots)
+  cleaned = cleaned.replace(/\.{3,}/g, '...');
+
+  // Remove leading/trailing whitespace and ellipsis
+  cleaned = cleaned.trim();
+
+  return cleaned;
+}
+
+/**
+ * Extract a meaningful document name from URL or title
+ */
+function extractDocumentName(url: string | undefined, title: string): string {
+  // If title looks like a proper name (not just an ID like "0304-J"), use it
+  if (title && !/^\d{4}-[A-Z]$/.test(title) && title.length > 10) {
+    return title;
+  }
+
+  // Try to extract filename from URL
+  if (url) {
+    try {
+      const urlObj = new URL(url);
+      const pathname = urlObj.pathname;
+      const filename = pathname.split('/').pop();
+      if (filename) {
+        // Remove file extension and decode
+        const name = decodeURIComponent(filename.replace(/\.[^.]+$/, ''));
+        // Convert underscores/hyphens to spaces for readability
+        const readable = name.replace(/[_-]/g, ' ');
+        if (readable.length > 5) {
+          return readable;
+        }
+      }
+    } catch {
+      // Invalid URL, continue with fallback
+    }
+  }
+
+  return title || 'Document';
+}
 
 export function SearchResults() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -212,10 +277,22 @@ export function SearchResults() {
             {results.search_results.map((result) => {
               // Extract data from nested structure
               const derivedData = result.document?.derivedStructData;
-              const title = derivedData?.title || result.title || 'Untitled Document';
-              const snippet = derivedData?.snippets?.[0] || result.snippet || '';
+              const rawTitle = derivedData?.title || result.title || '';
               const documentUrl = derivedData?.link || result.url;
               const docId = result.id;
+
+              // Get a meaningful document name
+              const documentName = extractDocumentName(documentUrl, rawTitle);
+
+              // Combine and clean snippets for better context
+              const snippets = derivedData?.snippets || [];
+              const rawSnippet = snippets.length > 0
+                ? snippets.slice(0, 3).join(' ... ')
+                : result.snippet || '';
+              const cleanedSnippet = cleanSnippet(rawSnippet);
+
+              // Check if title is just an ID (like "0304-J")
+              const isIdTitle = /^\d{4}-[A-Z]$/.test(rawTitle);
 
               return (
                 <Card
@@ -225,7 +302,7 @@ export function SearchResults() {
                 >
                   <div className={styles.resultHeader}>
                     <div className={styles.resultTitle}>
-                      <h3>{title}</h3>
+                      <h3>{documentName}</h3>
                       {result.metadata?.document_type && (
                         <Badge variant="info">
                           {result.metadata.document_type}
@@ -235,21 +312,36 @@ export function SearchResults() {
                     <ChevronRight size={20} className={styles.chevron} />
                   </div>
 
-                  {result.metadata?.docket_number && (
-                    <p className={styles.caseNumber}>
-                      Docket: {result.metadata.docket_number}
-                    </p>
-                  )}
+                  {/* Document ID badge if title was an ID */}
+                  <div className={styles.resultMetaRow}>
+                    {isIdTitle && rawTitle && (
+                      <span className={styles.metaItem}>
+                        <Hash size={14} />
+                        <span>ID: {rawTitle}</span>
+                      </span>
+                    )}
+                    {result.metadata?.docket_number && (
+                      <span className={styles.metaItem}>
+                        <FileText size={14} />
+                        <span>Docket: {result.metadata.docket_number}</span>
+                      </span>
+                    )}
+                    {result.metadata?.filed_date && (
+                      <span className={styles.metaItem}>
+                        <Calendar size={14} />
+                        <span>{result.metadata.filed_date}</span>
+                      </span>
+                    )}
+                    {result.metadata?.filed_by && (
+                      <span className={styles.metaItem}>
+                        <User size={14} />
+                        <span>{result.metadata.filed_by}</span>
+                      </span>
+                    )}
+                  </div>
 
-                  <p className={styles.snippet}>{snippet}</p>
-
-                  {result.metadata?.filed_date && (
-                    <div className={styles.resultMeta}>
-                      <span>Filed: {result.metadata.filed_date}</span>
-                      {result.metadata?.filed_by && (
-                        <span>By: {result.metadata.filed_by}</span>
-                      )}
-                    </div>
+                  {cleanedSnippet && (
+                    <p className={styles.snippet}>{cleanedSnippet}</p>
                   )}
 
                   <div className={styles.resultActions}>
