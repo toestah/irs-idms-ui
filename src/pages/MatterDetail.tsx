@@ -20,6 +20,7 @@ import { Card, Button, Badge } from '../components';
 import { useCase } from '../hooks';
 import { getSignedUrl } from '../services/api';
 import type { DocketEntry } from '../services/api';
+import { MOCK_TEAM_MEMBERS } from '../config';
 import styles from './MatterDetail.module.css';
 
 interface TeamMember {
@@ -36,10 +37,7 @@ interface RecentFile {
 }
 
 // Mock team members - would come from a team/assignment API in the future
-const teamMembers: TeamMember[] = [
-  { initials: 'JS', name: 'Jack Smith', role: 'Lead counsel', color: '#3b82f6' },
-  { initials: 'MK', name: 'Mike Kim', role: 'Writer, para', color: '#10b981' },
-];
+const teamMembers: TeamMember[] = MOCK_TEAM_MEMBERS;
 
 export function MatterDetail() {
   const { id: matterId } = useParams();
@@ -121,25 +119,27 @@ export function MatterDetail() {
 
       {/* Error State - Case Not Available */}
       {error && !isLoading && (
-        <Card className={styles.notFoundCard} padding="lg">
-          <div className={styles.notFoundContent}>
-            <AlertCircle size={48} className={styles.notFoundIcon} />
-            <h3>Case Details Not Available</h3>
-            <p>{error}</p>
-            <p className={styles.notFoundHint}>
-              This document may be from a case that hasn't been fully indexed yet,
-              or the case identifier format may not match our records.
-            </p>
-            <div className={styles.notFoundActions}>
-              <Button variant="outline" onClick={() => navigate(-1)}>
-                Go Back
-              </Button>
-              <Button variant="primary" onClick={() => navigate('/')}>
-                New Search
-              </Button>
+        <div aria-live="polite" className={styles.errorContainer}>
+          <Card className={styles.notFoundCard} padding="lg">
+            <div className={styles.notFoundContent}>
+              <AlertCircle size={48} className={styles.notFoundIcon} />
+              <h3>Case Details Not Available</h3>
+              <p>{error}</p>
+              <p className={styles.notFoundHint}>
+                This document may be from a case that hasn't been fully indexed yet,
+                or the case identifier format may not match our records.
+              </p>
+              <div className={styles.notFoundActions}>
+                <Button variant="outline" onClick={() => navigate(-1)}>
+                  Go Back
+                </Button>
+                <Button variant="primary" onClick={() => navigate('/')}>
+                  New Search
+                </Button>
+              </div>
             </div>
-          </div>
-        </Card>
+          </Card>
+        </div>
       )}
 
       {/* Main Content */}
