@@ -62,6 +62,48 @@
   flex: 1;
 }
 
+/* Not Found Card */
+.notFoundCard {
+  max-width: 500px;
+  margin: var(--spacing-xl) auto;
+  text-align: center;
+}
+
+.notFoundContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.notFoundIcon {
+  color: var(--color-text-muted);
+  margin-bottom: var(--spacing-sm);
+}
+
+.notFoundContent h3 {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.notFoundContent p {
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.notFoundHint {
+  font-size: 14px;
+  color: var(--color-text-muted);
+  max-width: 400px;
+}
+
+.notFoundActions {
+  display: flex;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-md);
+}
+
 /* Empty State */
 .emptyState {
   display: flex;

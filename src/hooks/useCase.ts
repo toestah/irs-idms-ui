@@ -47,11 +47,19 @@ export function useCase(options: UseCaseOptions = {}): UseCaseState & UseCaseAct
       setCaseData(response);
       return response;
     } catch (err) {
-      const message = err instanceof ApiError
-        ? err.status === 404
-          ? `Case "${docketNumber}" not found`
-          : err.message
-        : 'Failed to load case details';
+      let message: string;
+      if (err instanceof ApiError) {
+        if (err.status === 404) {
+          message = `Case "${docketNumber}" not found`;
+        } else if (err.status === 0) {
+          // Network error (often CORS) - the case likely doesn't exist in the database
+          message = `Case details not available for "${docketNumber}"`;
+        } else {
+          message = err.message;
+        }
+      } else {
+        message = 'Failed to load case details';
+      }
       setError(message);
       return null;
     } finally {

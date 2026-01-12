@@ -119,15 +119,25 @@ export function MatterDetail() {
         </div>
       )}
 
-      {/* Error State */}
-      {error && (
-        <Card className={styles.errorCard} padding="md">
-          <div className={styles.errorContent}>
-            <AlertCircle size={20} />
-            <span>{error}</span>
-            <Button variant="ghost" size="sm" onClick={clearError}>
-              Dismiss
-            </Button>
+      {/* Error State - Case Not Available */}
+      {error && !isLoading && (
+        <Card className={styles.notFoundCard} padding="lg">
+          <div className={styles.notFoundContent}>
+            <AlertCircle size={48} className={styles.notFoundIcon} />
+            <h3>Case Details Not Available</h3>
+            <p>{error}</p>
+            <p className={styles.notFoundHint}>
+              This document may be from a case that hasn't been fully indexed yet,
+              or the case identifier format may not match our records.
+            </p>
+            <div className={styles.notFoundActions}>
+              <Button variant="outline" onClick={() => navigate(-1)}>
+                Go Back
+              </Button>
+              <Button variant="primary" onClick={() => navigate('/')}>
+                New Search
+              </Button>
+            </div>
           </div>
         </Card>
       )}
