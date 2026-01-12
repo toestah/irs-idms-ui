@@ -47,7 +47,7 @@ export function MatterDetail() {
   const [searchQuery, setSearchQuery] = useState('');
 
   // Fetch case data
-  const { caseData, isLoading, error, fetchCase, clearError } = useCase();
+  const { caseData, isLoading, error, fetchCase } = useCase();
 
   // Load case on mount
   useEffect(() => {
