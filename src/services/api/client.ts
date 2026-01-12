@@ -11,14 +11,21 @@
 import config from '../../config/env';
 
 export class ApiError extends Error {
+  status: number;
+  endpoint: string;
+  details?: unknown;
+
   constructor(
     message: string,
-    public status: number,
-    public endpoint: string,
-    public details?: unknown
+    status: number,
+    endpoint: string,
+    details?: unknown
   ) {
     super(message);
     this.name = 'ApiError';
+    this.status = status;
+    this.endpoint = endpoint;
+    this.details = details;
   }
 }
 

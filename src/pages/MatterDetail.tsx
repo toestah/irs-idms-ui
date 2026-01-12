@@ -145,8 +145,8 @@ export function MatterDetail() {
                 {docketNumber}
                 {caseInfo?.status && (
                   <Badge
-                    variant={caseInfo.status === 'active' ? 'info' : 'secondary'}
-                    style={{ marginLeft: '8px' }}
+                    variant={caseInfo.status === 'active' ? 'info' : 'default'}
+                    className={styles.statusBadge}
                   >
                     {caseInfo.status}
                   </Badge>
@@ -297,7 +297,7 @@ export function MatterDetail() {
                       <div key={entry.docket_entry_id} className={styles.docketRow}>
                         <span className={styles.docketDate}>{entry.filed_date}</span>
                         <span>
-                          <Badge variant="secondary">{entry.document_type}</Badge>
+                          <Badge variant="info">{entry.document_type}</Badge>
                         </span>
                         <span className={styles.docketDescription}>{entry.description}</span>
                         <span className={styles.docketFiledBy}>{entry.filed_by}</span>
@@ -351,7 +351,7 @@ export function MatterDetail() {
 
       {/* Empty State - No case data and not loading */}
       {!isLoading && !caseData && !error && (
-        <Card className={styles.emptyState} padding="xl">
+        <Card className={styles.emptyState} padding="lg">
           <FileText size={48} className={styles.emptyIcon} />
           <h3>Case Not Found</h3>
           <p>The requested case could not be found.</p>

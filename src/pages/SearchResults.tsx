@@ -302,13 +302,12 @@ export function SearchResults() {
                 key={result.id}
                 className={styles.resultCard}
                 padding="lg"
-                onClick={() => handleResultClick(result)}
               >
                 <div className={styles.resultHeader}>
                   <div className={styles.resultTitle}>
                     <h3>{result.title}</h3>
                     {result.metadata?.document_type && (
-                      <Badge variant="secondary">
+                      <Badge variant="info">
                         {result.metadata.document_type}
                       </Badge>
                     )}
@@ -390,7 +389,7 @@ export function SearchResults() {
 
       {/* No Results */}
       {!isLoading && results?.search_results?.length === 0 && (
-        <Card className={styles.noResults} padding="xl">
+        <Card className={styles.noResults} padding="lg">
           <FileText size={48} className={styles.noResultsIcon} />
           <h3>No documents found</h3>
           <p>Try adjusting your search query or filters</p>

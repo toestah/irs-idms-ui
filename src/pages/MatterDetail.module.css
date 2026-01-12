@@ -477,6 +477,11 @@
   text-align: center;
 }
 
+/* Status Badge */
+.statusBadge {
+  margin-left: var(--spacing-sm);
+}
+
 /* Judge info */
 .judge {
   font-size: 13px;
