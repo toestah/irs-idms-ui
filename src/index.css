@@ -5,6 +5,8 @@
   --color-primary-dark: #1e3a5f;
   --color-primary: #2c4f75;
   --color-primary-light: #3d5a80;
+  --color-primary-darker: #152b47;
+  --color-primary-hover: #4a6a8f;
 
   /* Background Colors */
   --color-bg-primary: #f9fafb;
@@ -23,16 +25,25 @@
   --color-text-light: #4a5565;
   --color-text-white: #ffffff;
   --color-text-link: #bedbff;
+  --color-text-placeholder: #d1d5dc;
 
   /* Status Colors */
   --color-success: #10b981;
   --color-success-light: #d1fae5;
+  --color-success-text: #065f46;
+
   --color-warning: #f59e0b;
   --color-warning-light: #fef3c7;
+  --color-warning-text: #92400e;
+
   --color-danger: #fb2c36;
   --color-danger-light: #fee2e2;
+  --color-danger-text: #991b1b;
+  --color-danger-dark: #dc2626;
+
   --color-info: #3b82f6;
   --color-info-light: #dbeafe;
+  --color-info-text: #1e40af;
 
   /* Confidence Colors */
   --color-confidence-high: #10b981;

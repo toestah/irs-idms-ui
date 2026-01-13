@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Clock, TrendingUp } from 'lucide-react';
+import { SearchInput } from '../components';
 import styles from './Dashboard.module.css';
 
 const recentSearches = [
@@ -50,16 +51,13 @@ export function Dashboard() {
             <span>Conversational Search</span>
           </div>
           <form className={styles.searchForm} onSubmit={handleSearch}>
-            <input
-              type="text"
-              placeholder='Ask a question (e.g., "What is the total transaction amount?")'
+            <SearchInput
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className={styles.searchInput}
+              placeholder='Ask a question (e.g., "What is the total transaction amount?")'
+              fullWidth
+              aria-label="Conversational Search"
             />
-            <button type="submit" className={styles.searchButton}>
-              <Search size={20} />
-            </button>
           </form>
         </div>
 

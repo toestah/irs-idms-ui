@@ -16,7 +16,7 @@ import {
   AlertCircle,
   ExternalLink,
 } from 'lucide-react';
-import { Card, Button, Badge } from '../components';
+import { Card, Button, Badge, SearchInput } from '../components';
 import { useCase } from '../hooks';
 import { getSignedUrl } from '../services/api';
 import type { DocketEntry } from '../services/api';
@@ -182,16 +182,12 @@ export function MatterDetail() {
                   <span>Search within this matter</span>
                 </div>
                 <form className={styles.searchForm} onSubmit={handleSearch}>
-                  <input
-                    type="text"
-                    placeholder='Ask a question (e.g., "What is the total transaction amount?")'
+                  <SearchInput
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className={styles.searchInput}
+                    placeholder='Ask a question (e.g., "What is the total transaction amount?")'
+                    fullWidth
                   />
-                  <button type="submit" className={styles.searchButton}>
-                    <Search size={20} />
-                  </button>
                 </form>
               </Card>
 
