@@ -99,6 +99,29 @@ Routes defined in `src/App.tsx`, all wrapped by `MainLayout`:
 - React Hooks rules enforced
 - React Refresh rules for HMR compatibility
 
-## Figma Reference
+## Figma Integration
 
-Designs: `https://www.figma.com/design/bsYh8MXSoGgmSO8CNAFZQ9/IDMS-Screen-Flow`
+The UI is built from Figma mockups. Claude Code can access designs directly via the Figma MCP server.
+
+**Design File:** https://www.figma.com/design/bsYh8MXSoGgmSO8CNAFZQ9/IDMS-Screen-Flow
+
+### Screen Mapping
+
+| Figma Screen | Node ID | Implementation |
+|--------------|---------|----------------|
+| 1.0 Dashboard | `34:3404` | `src/pages/Dashboard.tsx` |
+| 2.0 Search Results | `34:3742` | `src/pages/SearchResults.tsx` |
+| 3.0 Results Detail | `34:4313` | `src/pages/MatterDetail.tsx` |
+| 4.0 Document List | `160:15757` | `src/pages/DocumentQueue.tsx` |
+| 5.0 HITL Verification | `169:16552` | `src/pages/DocumentVerification.tsx` |
+| 5.1 HITL Edit | `172:19076` | `src/pages/DocumentVerification.tsx` (edit mode) |
+
+### MCP Server Setup
+
+The project includes `.mcp.json` for Figma MCP configuration. Each developer needs to:
+
+1. Generate a Figma Personal Access Token (Account Settings → Personal Access Tokens)
+2. Set `FIGMA_ACCESS_TOKEN` environment variable in your shell profile
+3. Restart Claude Code
+
+See `docs/FIGMA_SETUP.md` for detailed instructions.
