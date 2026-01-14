@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Upload, Download, Filter, FileText } from 'lucide-react';
+import { Upload, Download, Filter, FileText, CheckCircle2 } from 'lucide-react';
 import {
   Card,
   Button,
@@ -10,6 +10,11 @@ import {
   TableRow,
   TableCell,
   ConfidenceBadge,
+  Pagination,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
 } from '../components';
 import styles from './DocumentQueue.module.css';
 
@@ -78,12 +83,71 @@ const mockDocuments: Document[] = [
     status: 'verified',
     confidence: 100,
   },
+  {
+    id: '7',
+    name: 'Petition',
+    petitioner: 'Davidsons',
+    orderDate: 'Nov 10, 2024',
+    uploadDate: 'Dec 10, 2024',
+    status: 'pending',
+    confidence: 45,
+  },
+  {
+    id: '8',
+    name: 'Answer',
+    petitioner: 'IRS',
+    orderDate: 'Nov 12, 2024',
+    uploadDate: 'Dec 11, 2024',
+    status: 'verified',
+    confidence: 98,
+  },
 ];
+
+const ITEMS_PER_PAGE = 5;
 
 export function DocumentQueue() {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('pending');
   const [filter, setFilter] = useState('');
   const [sortBy, setSortBy] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    setCurrentPage(1); // Reset pagination on tab switch
+  };
+
+  // Filter and Sort Logic
+  const filteredDocs = useMemo(() => {
+    let docs = mockDocuments.filter((doc) => doc.status === activeTab);
+
+    if (filter) {
+      const lowerFilter = filter.toLowerCase();
+      docs = docs.filter(
+        (doc) =>
+          doc.name.toLowerCase().includes(lowerFilter) ||
+          doc.petitioner.toLowerCase().includes(lowerFilter) ||
+          doc.id.includes(lowerFilter)
+      );
+    }
+
+    if (sortBy) {
+      docs = [...docs].sort((a, b) => {
+        if (sortBy === 'date') return new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime();
+        if (sortBy === 'confidence') return b.confidence - a.confidence;
+        return 0;
+      });
+    }
+
+    return docs;
+  }, [activeTab, filter, sortBy]);
+
+  // Pagination Logic
+  const totalPages = Math.ceil(filteredDocs.length / ITEMS_PER_PAGE);
+  const paginatedDocs = filteredDocs.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
 
   const pendingCount = mockDocuments.filter((d) => d.status === 'pending').length;
   const verifiedCount = mockDocuments.filter((d) => d.status === 'verified').length;
@@ -91,66 +155,13 @@ export function DocumentQueue() {
   const handleViewVerify = (doc: Document) => {
     if (doc.status === 'pending') {
       navigate(`/verification/${doc.id}`);
+    } else {
+       navigate(`/matters/${doc.id}`);
     }
   };
 
-  return (
-    <div className={styles.page}>
-      <div className={styles.header}>
-        <div className={styles.headerContent}>
-          <h1>Document Verification Queue</h1>
-          <p>Review and verify extracted data from uploaded tax court documents</p>
-        </div>
-        <Button variant="primary" icon={<Upload size={16} />}>
-          Upload Documents
-        </Button>
-      </div>
-
-      <div className={styles.statusTabs}>
-        <button className={`${styles.statusTab} ${styles.pendingTab}`}>
-          <FileText size={16} />
-          <span>Pending Review</span>
-          <span className={styles.tabCount}>{pendingCount}</span>
-        </button>
-        <button className={`${styles.statusTab} ${styles.verifiedTab}`}>
-          <FileText size={16} />
-          <span>Verified</span>
-          <span className={styles.tabCount}>{verifiedCount}</span>
-        </button>
-      </div>
-
-      <div className={styles.controls}>
-        <div className={styles.filters}>
-          <div className={styles.filterGroup}>
-            <Filter size={16} />
-            <span>Filter:</span>
-            <input
-              type="text"
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-              placeholder="Search..."
-              className={styles.filterInput}
-            />
-          </div>
-          <div className={styles.filterGroup}>
-            <span>Sort by:</span>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className={styles.sortSelect}
-            >
-              <option value="">Select...</option>
-              <option value="date">Upload Date</option>
-              <option value="confidence">Confidence</option>
-              <option value="status">Status</option>
-            </select>
-          </div>
-        </div>
-        <Button variant="secondary" icon={<Download size={16} />}>
-          Export Report
-        </Button>
-      </div>
-
+  const renderTable = (docs: Document[]) => (
+    <>
       <Card padding="none">
         <Table>
           <TableHeader>
@@ -160,12 +171,16 @@ export function DocumentQueue() {
               <TableCell header>Order Date</TableCell>
               <TableCell header>Upload Date</TableCell>
               <TableCell header>Status</TableCell>
-              <TableCell header align="center">Confidence</TableCell>
-              <TableCell header align="center">Action</TableCell>
+              <TableCell header align="center">
+                Confidence
+              </TableCell>
+              <TableCell header align="center">
+                Action
+              </TableCell>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {mockDocuments.map((doc) => (
+            {docs.map((doc) => (
               <TableRow key={doc.id}>
                 <TableCell>
                   <div className={styles.documentName}>
@@ -197,21 +212,89 @@ export function DocumentQueue() {
                 </TableCell>
               </TableRow>
             ))}
+            {docs.length === 0 && (
+              <TableRow>
+                 <TableCell colSpan={7} align="center">
+                    <div className={styles.emptyState}>
+                       No documents found in this view.
+                    </div>
+                 </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </Card>
 
-      <div className={styles.pagination}>
-        <span className={styles.paginationInfo}>
-          Showing {mockDocuments.length} of {mockDocuments.length} documents
-        </span>
-        <div className={styles.paginationControls}>
-          <button className={styles.paginationButton}>Previous</button>
-          <button className={`${styles.paginationButton} ${styles.active}`}>1</button>
-          <button className={styles.paginationButton}>2</button>
-          <button className={styles.paginationButton}>Next</button>
+      {docs.length > 0 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
+      )}
+    </>
+  );
+
+  return (
+    <div className={styles.page}>
+      <div className={styles.header}>
+        <div className={styles.headerContent}>
+          <h1>Document Verification Queue</h1>
+          <p>Review and verify extracted data from uploaded tax court documents</p>
         </div>
+        <Button variant="primary" icon={<Upload size={16} />}>
+          Upload Documents
+        </Button>
       </div>
+
+      <Tabs value={activeTab} onValueChange={handleTabChange}>
+        <TabsList>
+          <TabsTrigger value="pending">
+            <FileText size={16} />
+            <span>Pending Review</span>
+            <span className={styles.badge}>{pendingCount}</span>
+          </TabsTrigger>
+          <TabsTrigger value="verified">
+            <CheckCircle2 size={16} />
+            <span>Verified</span>
+            <span className={styles.badge}>{verifiedCount}</span>
+          </TabsTrigger>
+        </TabsList>
+
+        <div className={styles.controls}>
+          <div className={styles.filters}>
+            <div className={styles.filterGroup}>
+              <Filter size={16} />
+              <span>Filter:</span>
+              <input
+                type="text"
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+                placeholder="Search..."
+                className={styles.filterInput}
+              />
+            </div>
+            <div className={styles.filterGroup}>
+              <span>Sort by:</span>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className={styles.sortSelect}
+              >
+                <option value="">Select...</option>
+                <option value="date">Upload Date</option>
+                <option value="confidence">Confidence</option>
+              </select>
+            </div>
+          </div>
+          <Button variant="secondary" icon={<Download size={16} />}>
+            Export Report
+          </Button>
+        </div>
+
+        <TabsContent value="pending">{renderTable(paginatedDocs)}</TabsContent>
+        <TabsContent value="verified">{renderTable(paginatedDocs)}</TabsContent>
+      </Tabs>
     </div>
   );
 }

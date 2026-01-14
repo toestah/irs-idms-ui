@@ -20,44 +20,6 @@
   margin: 0;
 }
 
-.statusTabs {
-  display: flex;
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-lg);
-}
-
-.statusTab {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-md) var(--spacing-lg);
-  background-color: var(--color-bg-white);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  font-size: 14px;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.statusTab:hover {
-  border-color: var(--color-primary-dark);
-}
-
-.pendingTab {
-  border-left: 3px solid var(--color-primary-dark);
-  background-color: var(--color-bg-secondary);
-}
-
-.verifiedTab {
-  border-left: 3px solid var(--color-success);
-}
-
-.tabCount {
-  font-weight: 600;
-  color: var(--color-text-primary);
-}
-
 .controls {
   display: flex;
   align-items: center;
@@ -154,44 +116,24 @@
   text-decoration: underline;
 }
 
-.pagination {
-  display: flex;
+.badge {
+  display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  margin-top: var(--spacing-lg);
-  padding: var(--spacing-md) 0;
-}
-
-.paginationInfo {
-  font-size: 14px;
-  color: var(--color-text-muted);
-}
-
-.paginationControls {
-  display: flex;
-  gap: var(--spacing-sm);
-}
-
-.paginationButton {
-  min-width: 36px;
-  height: 36px;
-  padding: 0 var(--spacing-md);
-  background-color: var(--color-bg-white);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  font-size: 14px;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-bg-secondary);
   color: var(--color-text-secondary);
-  cursor: pointer;
-  transition: all 0.2s;
+  font-size: 11px;
+  font-weight: 600;
+  margin-left: var(--spacing-xs);
 }
 
-.paginationButton:hover {
-  border-color: var(--color-primary-dark);
-  color: var(--color-primary-dark);
-}
-
-.paginationButton.active {
-  background-color: var(--color-primary-dark);
-  border-color: var(--color-primary-dark);
-  color: white;
+.emptyState {
+  padding: var(--spacing-xl);
+  text-align: center;
+  color: var(--color-text-muted);
+  font-style: italic;
 }

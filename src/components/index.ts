@@ -5,3 +5,10 @@ export { Button, IconButton } from './Button';
 export { Card, CardHeader, CardContent, CardFooter } from './Card';
 export { Table, TableHeader, TableBody, TableRow, TableCell } from './Table';
 export { TextInput, SearchInput } from './TextInput';
+export { Pagination } from './Pagination';
+export * from './Tabs';
+export * from './Modal';
+export { EmptyState } from './EmptyState';
+
+
+
