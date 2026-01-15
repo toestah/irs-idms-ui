@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -72,7 +72,10 @@ export function SearchResults() {
 
   // Local state
   const [followUpQuestion, setFollowUpQuestion] = useState('');
-  const [hasAutoTriggeredAnswer, setHasAutoTriggeredAnswer] = useState(false);
+
+  // Use ref to track auto-trigger to avoid cascading renders from setState in useEffect
+  const hasAutoTriggeredAnswerRef = useRef(false);
+  const lastQueryRef = useRef<string>('');
 
   // Note: /api/filters endpoint not yet available on backend
   // Filters will be enabled once backend supports this endpoint
@@ -83,7 +86,11 @@ export function SearchResults() {
   // Perform search when query changes
   useEffect(() => {
     if (query) {
-      setHasAutoTriggeredAnswer(false); // Reset when query changes
+      // Reset auto-trigger flag when query changes
+      if (lastQueryRef.current !== query) {
+        hasAutoTriggeredAnswerRef.current = false;
+        lastQueryRef.current = query;
+      }
       performSearch({
         query,
         page: 1,
@@ -94,15 +101,15 @@ export function SearchResults() {
 
   // Auto-trigger AI answer when search results arrive (the hero experience!)
   useEffect(() => {
-    if (results?.search_results?.length && !hasAutoTriggeredAnswer && !isLoadingAnswer && !answer) {
-      setHasAutoTriggeredAnswer(true);
+    if (results?.search_results?.length && !hasAutoTriggeredAnswerRef.current && !isLoadingAnswer && !answer) {
+      hasAutoTriggeredAnswerRef.current = true;
       getAnswer({
         query,
         searchResults: results.search_results,
         session_link: results.session,
       });
     }
-  }, [results, hasAutoTriggeredAnswer, isLoadingAnswer, answer, query, getAnswer]);
+  }, [results, isLoadingAnswer, answer, query, getAnswer]);
 
   // Handle follow-up question submission
   const handleFollowUp = async (e: React.FormEvent) => {
