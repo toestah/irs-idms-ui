@@ -4,8 +4,9 @@
  * Provides a consistent interface for making HTTP requests with:
  * - Automatic error handling
  * - Request/response logging in debug mode
- * - Timeout handling
  * - Authentication header injection
+ *
+ * Note: Timeouts are handled by the backend, not the frontend.
  */
 
 import config from '../../config/env';
@@ -30,17 +31,14 @@ export class ApiError extends Error {
 }
 
 interface RequestOptions extends RequestInit {
-  timeout?: number;
   skipAuth?: boolean;
 }
 
 class ApiClient {
   private baseUrl: string;
-  private defaultTimeout: number;
 
-  constructor(baseUrl: string, defaultTimeout: number = config.API_TIMEOUT) {
+  constructor(baseUrl: string) {
     this.baseUrl = baseUrl;
-    this.defaultTimeout = defaultTimeout;
   }
 
   private getAuthToken(): string | null {
@@ -78,22 +76,14 @@ class ApiClient {
 
   async request<T>(endpoint: string, options?: RequestOptions): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
-    const timeout = options?.timeout ?? this.defaultTimeout;
 
     this.log(`${options?.method || 'GET'} ${endpoint}`, options?.body);
-
-    // Create abort controller for timeout
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
 
     try {
       const response = await fetch(url, {
         ...options,
         headers: this.buildHeaders(options),
-        signal: controller.signal,
       });
-
-      clearTimeout(timeoutId);
 
       // Parse response
       const contentType = response.headers.get('content-type');
@@ -121,15 +111,8 @@ class ApiClient {
 
       return data;
     } catch (error) {
-      clearTimeout(timeoutId);
-
       if (error instanceof ApiError) {
         throw error;
-      }
-
-      if (error instanceof DOMException && error.name === 'AbortError') {
-        this.logError(`Request timeout after ${timeout}ms`, endpoint);
-        throw new ApiError(`Request timeout after ${timeout}ms`, 408, endpoint);
       }
 
       this.logError('Request failed', error);

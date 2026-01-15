@@ -4,7 +4,6 @@
  */
 
 import { apiClient } from './client';
-import { SEARCH_TIMEOUT } from '../../config/env';
 import type {
   SearchRequest,
   SearchResponse,
@@ -17,9 +16,7 @@ import type {
  * Search for documents using natural language query
  */
 export async function search(params: SearchRequest): Promise<SearchResponse> {
-  return apiClient.post<SearchResponse>('/api/search', params, {
-    timeout: SEARCH_TIMEOUT,
-  });
+  return apiClient.post<SearchResponse>('/api/search', params);
 }
 
 /**

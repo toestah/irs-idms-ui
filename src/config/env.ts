@@ -17,10 +17,6 @@ interface EnvConfig {
   ENABLE_DOCUMENT_CHAT: boolean;
   ENABLE_SSE_STREAMING: boolean;
 
-  // Timeouts (ms)
-  API_TIMEOUT: number;
-  SEARCH_TIMEOUT: number;
-
   // Debug
   DEBUG_MODE: boolean;
 }
@@ -36,10 +32,6 @@ const config: EnvConfig = {
   ENABLE_DOCUMENT_CHAT: import.meta.env.VITE_ENABLE_DOCUMENT_CHAT !== 'false',
   ENABLE_SSE_STREAMING: import.meta.env.VITE_ENABLE_SSE_STREAMING !== 'false',
 
-  // Timeouts
-  API_TIMEOUT: parseInt(import.meta.env.VITE_API_TIMEOUT || '30000', 10),
-  SEARCH_TIMEOUT: parseInt(import.meta.env.VITE_SEARCH_TIMEOUT || '15000', 10),
-
   // Debug
   DEBUG_MODE: import.meta.env.VITE_DEBUG_MODE === 'true' || import.meta.env.DEV,
 };
@@ -53,7 +45,5 @@ export const {
   ENABLE_AI_ANSWERS,
   ENABLE_DOCUMENT_CHAT,
   ENABLE_SSE_STREAMING,
-  API_TIMEOUT,
-  SEARCH_TIMEOUT,
   DEBUG_MODE,
 } = config;
