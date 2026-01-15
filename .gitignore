@@ -26,3 +26,6 @@ dist-ssr
 
 # MCP configuration (contains personal access tokens)
 .mcp.json
+
+# Environment variables (contains secrets)
+.env

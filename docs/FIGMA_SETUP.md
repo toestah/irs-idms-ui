@@ -1,6 +1,6 @@
 # Figma MCP Server Setup
 
-This project uses the Figma MCP server to allow Claude Code to read and analyze Figma designs directly.
+This project uses Figma's official MCP server to allow Claude Code to read and analyze Figma designs directly.
 
 ## Figma Design File
 
@@ -19,48 +19,19 @@ This project uses the Figma MCP server to allow Claude Code to read and analyze 
 
 ## Setup Instructions
 
-### 1. Generate a Figma Personal Access Token
+### Quick Setup (One Command)
 
-1. Log into Figma (use your corporate account that has access to the IDMS-Screen-Flow file)
-2. Go to **Account Settings** → **Personal Access Tokens**
-3. Click **Generate new token**
-4. Give it a description like "Claude Code MCP"
-5. Copy the token (you won't be able to see it again)
-
-### 2. Configure the MCP Server
-
-Copy the example configuration and add your token:
+Run this command in the project directory:
 
 ```bash
-cp .mcp.json.example .mcp.json
+claude mcp add --transport http figma https://mcp.figma.com/mcp
 ```
 
-Edit `.mcp.json` and replace the placeholder with your token:
+Then restart Claude Code. On first use, you'll be prompted to authenticate via your browser using your Figma account.
 
-```json
-{
-  "mcpServers": {
-    "figma": {
-      "command": "npx",
-      "args": ["-y", "@anthropics/mcp-server-figma"],
-      "env": {
-        "FIGMA_ACCESS_TOKEN": "your-actual-token-here"
-      }
-    }
-  }
-}
-```
+### Verify Connection
 
-**Note:** `.mcp.json` is gitignored to protect your personal access token. Never commit tokens to the repository.
-
-### 3. Restart Claude Code
-
-After configuring the token, restart Claude Code to pick up the MCP server configuration.
-
-### 4. Verify Connection
-
-Ask Claude Code to read a Figma file:
-
+After restarting, ask Claude Code:
 ```
 Read the Figma design at https://www.figma.com/design/bsYh8MXSoGgmSO8CNAFZQ9/IDMS-Screen-Flow and list all screens
 ```
@@ -80,19 +51,17 @@ The following accounts have access to the Figma file:
 - taimur@googlecloud.corp-partner.google.com
 - (Add other team member emails here)
 
-Each team member needs to generate their own Personal Access Token using their Figma account.
+Each team member runs the `claude mcp add` command and authenticates with their own Figma account.
 
 ## Troubleshooting
 
 **"Figma MCP not connected"**
-- Ensure `.mcp.json` is in the project root
-- Verify your `FIGMA_ACCESS_TOKEN` is set correctly
+- Run: `claude mcp add --transport http figma https://mcp.figma.com/mcp`
 - Restart Claude Code
 
 **"403 Forbidden" or "Access Denied"**
 - Your Figma account may not have access to the file
 - Request access from the file owner
-- Verify your token hasn't expired
 
 **"Node not found"**
 - Node IDs can change if frames are deleted/recreated in Figma
