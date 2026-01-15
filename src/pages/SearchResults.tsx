@@ -260,12 +260,22 @@ export function SearchResults() {
             {results.search_results.map((result) => {
               // Extract data from nested structure
               const derivedData = result.document?.derivedStructData;
+              const enrichedMetadata = result.metadata;
               const rawTitle = derivedData?.title || result.title || '';
               const documentUrl = derivedData?.link || result.url;
               const docId = result.id;
 
-              // Get a meaningful document name
-              const documentName = extractDocumentName(documentUrl, rawTitle);
+              // Use display_title from backend if available, otherwise fall back to extraction
+              const displayTitle = derivedData?.display_title
+                || enrichedMetadata?.display_title
+                || extractDocumentName(documentUrl, rawTitle);
+
+              // Get enriched metadata fields
+              const documentType = enrichedMetadata?.document_type || result.metadata?.document_type;
+              const docketNumber = enrichedMetadata?.docket_number || result.metadata?.docket_number;
+              const exhibitId = enrichedMetadata?.exhibit_id;
+              const court = enrichedMetadata?.court;
+              const filingDate = enrichedMetadata?.filing_date || result.metadata?.filed_date;
 
               // Combine and clean snippets for better context
               const snippets = derivedData?.snippets || [];
@@ -273,9 +283,6 @@ export function SearchResults() {
                 ? snippets.slice(0, 3).join(' ... ')
                 : result.snippet || '';
               const cleanedSnippet = cleanSnippet(rawSnippet);
-
-              // Check if title is just an ID (like "0304-J")
-              const isIdTitle = /^\d{4}-[A-Z]$/.test(rawTitle);
 
               return (
                 <Card
@@ -285,40 +292,40 @@ export function SearchResults() {
                 >
                   <div className={styles.resultHeader}>
                     <div className={styles.resultTitle}>
-                      <h3>{documentName}</h3>
-                      {result.metadata?.document_type && (
+                      <h3>{displayTitle}</h3>
+                      {documentType && (
                         <Badge variant="info">
-                          {result.metadata.document_type}
+                          {documentType.length > 30 ? documentType.slice(0, 27) + '...' : documentType}
                         </Badge>
                       )}
                     </div>
                     <ChevronRight size={20} className={styles.chevron} />
                   </div>
 
-                  {/* Document ID badge if title was an ID */}
+                  {/* Enriched metadata row */}
                   <div className={styles.resultMetaRow}>
-                    {isIdTitle && rawTitle && (
+                    {exhibitId && (
                       <span className={styles.metaItem}>
                         <Hash size={14} />
-                        <span>ID: {rawTitle}</span>
+                        <span>Exhibit {exhibitId}</span>
                       </span>
                     )}
-                    {result.metadata?.docket_number && (
+                    {docketNumber && (
                       <span className={styles.metaItem}>
                         <FileText size={14} />
-                        <span>Docket: {result.metadata.docket_number}</span>
+                        <span>Docket: {docketNumber}</span>
                       </span>
                     )}
-                    {result.metadata?.filed_date && (
+                    {filingDate && (
                       <span className={styles.metaItem}>
                         <Calendar size={14} />
-                        <span>{result.metadata.filed_date}</span>
+                        <span>{filingDate}</span>
                       </span>
                     )}
-                    {result.metadata?.filed_by && (
+                    {court && (
                       <span className={styles.metaItem}>
                         <User size={14} />
-                        <span>{result.metadata.filed_by}</span>
+                        <span>{court.length > 40 ? court.slice(0, 37) + '...' : court}</span>
                       </span>
                     )}
                   </div>

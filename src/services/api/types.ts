@@ -45,10 +45,12 @@ export interface SearchRequest {
 export interface DerivedStructData {
   link?: string;
   title?: string;
+  display_title?: string;
   snippets?: string[];
   extractive_segments?: Array<{
     content: string;
-    page_number?: string;
+    page_number?: string | number;
+    relevance_score?: number;
   }>;
 }
 
@@ -64,6 +66,12 @@ export interface SearchResultMetadata {
   filed_by?: string;
   docket_number?: string;
   filed_date?: string;
+  // Enriched metadata from backend content extraction
+  display_title?: string;
+  exhibit_id?: string;
+  case_name?: string;
+  court?: string;
+  filing_date?: string;
 }
 
 export interface SearchResult {
