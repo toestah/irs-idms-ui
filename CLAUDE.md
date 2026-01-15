@@ -29,7 +29,7 @@ npm run preview  # Preview production build locally
 src/
 ├── config/env.ts          # Environment variables and feature flags
 ├── services/api/          # API client and endpoint modules
-│   ├── client.ts          # ApiClient class with auth, timeout, error handling
+│   ├── client.ts          # ApiClient class with auth, error handling
 │   ├── search.ts          # Search API (Vertex AI Search integration)
 │   ├── cases.ts           # Case/matter CRUD operations
 │   ├── documents.ts       # Document operations
@@ -50,8 +50,8 @@ Two backend services configured via environment variables:
 
 API client (`src/services/api/client.ts`) handles:
 - Bearer token auth from localStorage (`auth_token`)
-- Request timeout with AbortController
 - Debug logging when `VITE_DEBUG_MODE=true`
+- Error handling (timeouts are managed by backend)
 
 Feature flags in `src/config/env.ts`:
 - `VITE_ENABLE_AI_ANSWERS` - AI-generated answer summaries
