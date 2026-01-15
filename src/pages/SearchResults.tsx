@@ -301,26 +301,38 @@ export function SearchResults() {
 
   // Handle document view - convert GCS URLs to signed URLs
   const handleViewDocument = async (url: string) => {
+    // GCS URLs need to be converted to signed URLs
     if (url.startsWith('gs://')) {
       try {
         // Extract document ID from GCS URL
-        // Expected format: gs://bucket/docket-documents/12345678.pdf or similar
+        // Handles: gs://bucket/path/filename.pdf, gs://bucket/docket-documents/12345678.pdf
         const match = url.match(/\/([^/]+)\.pdf$/i);
         if (match) {
           const documentId = match[1];
           const response = await getSignedUrl(documentId);
           window.open(response.signed_url, '_blank');
         } else {
-          console.error('Could not extract document ID from URL:', url);
-          window.open(url, '_blank');
+          // Try extracting any filename (not just .pdf)
+          const anyFileMatch = url.match(/\/([^/]+)$/);
+          if (anyFileMatch) {
+            const documentId = anyFileMatch[1].replace(/\.[^.]+$/, ''); // Remove extension
+            const response = await getSignedUrl(documentId);
+            window.open(response.signed_url, '_blank');
+          } else {
+            console.error('Could not extract document ID from GCS URL:', url);
+            alert('Unable to open document: invalid GCS URL format');
+          }
         }
       } catch (err) {
         console.error('Failed to get signed URL:', err);
-        // Fallback: try opening directly (may not work)
-        window.open(url, '_blank');
+        alert('Unable to open document. Please try again later.');
       }
-    } else {
+    } else if (url.startsWith('http://') || url.startsWith('https://')) {
+      // Regular HTTP(S) URLs can be opened directly
       window.open(url, '_blank');
+    } else {
+      console.error('Unknown URL format:', url);
+      alert('Unable to open document: unsupported URL format');
     }
   };
 
