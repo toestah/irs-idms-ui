@@ -7,7 +7,6 @@ import {
   Loader2,
   AlertCircle,
   Sparkles,
-  X,
   Calendar,
   User,
   Hash,
@@ -71,11 +70,9 @@ export function SearchResults() {
     clearError,
   } = useSearch();
 
-  // Local filter state (disabled until backend supports /api/filters)
-  // const [selectedDocTypes, setSelectedDocTypes] = useState<string[]>([]);
-  // const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
-  // const [showFilters, setShowFilters] = useState(false);
-  const [showAiAnswer, setShowAiAnswer] = useState(false);
+  // Local state
+  const [followUpQuestion, setFollowUpQuestion] = useState('');
+  const [hasAutoTriggeredAnswer, setHasAutoTriggeredAnswer] = useState(false);
 
   // Note: /api/filters endpoint not yet available on backend
   // Filters will be enabled once backend supports this endpoint
@@ -86,6 +83,7 @@ export function SearchResults() {
   // Perform search when query changes
   useEffect(() => {
     if (query) {
+      setHasAutoTriggeredAnswer(false); // Reset when query changes
       performSearch({
         query,
         page: 1,
@@ -94,15 +92,26 @@ export function SearchResults() {
     }
   }, [query, performSearch]);
 
-  // Handle AI answer generation
-  const handleGetAnswer = async () => {
-    if (!results?.search_results) return;
-    setShowAiAnswer(true);
-    await getAnswer({
-      query,
-      searchResults: results.search_results,
-      session_link: results.session,
-    });
+  // Auto-trigger AI answer when search results arrive (the hero experience!)
+  useEffect(() => {
+    if (results?.search_results?.length && !hasAutoTriggeredAnswer && !isLoadingAnswer && !answer) {
+      setHasAutoTriggeredAnswer(true);
+      getAnswer({
+        query,
+        searchResults: results.search_results,
+        session_link: results.session,
+      });
+    }
+  }, [results, hasAutoTriggeredAnswer, isLoadingAnswer, answer, query, getAnswer]);
+
+  // Handle follow-up question submission
+  const handleFollowUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!followUpQuestion.trim()) return;
+
+    // Navigate to new search with the follow-up question
+    setSearchParams({ q: followUpQuestion });
+    setFollowUpQuestion('');
   };
 
   // Handle result click - navigate to matter detail
@@ -158,16 +167,6 @@ export function SearchResults() {
               {results && ` • ${results.count} documents found`}
             </p>
           </div>
-          <div className={styles.headerActions}>
-            <Button
-              variant="secondary"
-              icon={<Sparkles size={16} />}
-              onClick={handleGetAnswer}
-              disabled={isLoadingAnswer || !results?.search_results?.length}
-            >
-              {isLoadingAnswer ? 'Generating...' : 'AI Answer'}
-            </Button>
-          </div>
         </div>
       </div>
 
@@ -186,24 +185,17 @@ export function SearchResults() {
         </div>
       )}
 
-      {/* AI Answer Section */}
-      {showAiAnswer && (
+      {/* AI Answer Section - Always visible, the hero experience */}
+      {(isLoadingAnswer || answer || results?.search_results?.length) && (
         <Card className={styles.answerCard} padding="lg">
           <div className={styles.answerHeader}>
             <Sparkles size={20} className={styles.answerIcon} />
-            <h3>AI-Generated Answer</h3>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowAiAnswer(false)}
-            >
-              <X size={16} />
-            </Button>
+            <h3>AI Answer</h3>
           </div>
           {isLoadingAnswer ? (
             <div className={styles.answerLoading}>
               <Loader2 size={24} className={styles.spinner} />
-              <span>Generating answer from search results...</span>
+              <span>Analyzing documents and generating answer...</span>
             </div>
           ) : answer ? (
             <div className={styles.answerContent}>
@@ -230,10 +222,7 @@ export function SearchResults() {
                       <button
                         key={i}
                         className={styles.questionChip}
-                        onClick={() => {
-                          setSearchParams({ q });
-                          setShowAiAnswer(false);
-                        }}
+                        onClick={() => setSearchParams({ q })}
                       >
                         {q}
                       </button>
@@ -242,7 +231,30 @@ export function SearchResults() {
                 </div>
               )}
             </div>
-          ) : null}
+          ) : (
+            <div className={styles.answerLoading}>
+              <span>Waiting for search results...</span>
+            </div>
+          )}
+
+          {/* Follow-up Question Input */}
+          <form className={styles.followUpForm} onSubmit={handleFollowUp}>
+            <input
+              type="text"
+              value={followUpQuestion}
+              onChange={(e) => setFollowUpQuestion(e.target.value)}
+              placeholder="Ask a follow-up question..."
+              className={styles.followUpInput}
+            />
+            <Button
+              type="submit"
+              variant="primary"
+              size="sm"
+              disabled={!followUpQuestion.trim() || isLoadingAnswer}
+            >
+              Ask
+            </Button>
+          </form>
         </Card>
       )}
 
