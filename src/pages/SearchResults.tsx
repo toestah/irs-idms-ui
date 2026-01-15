@@ -16,7 +16,7 @@ import {
 import { Card, Button, Badge } from '../components';
 import { useSearch } from '../hooks';
 import type { SearchResult } from '../services/api';
-import { extractIdFromUrl, extractDocumentName } from '../utils/documentUtils';
+import { extractIdFromUrl, extractDocumentName, extractMetadataFromContent } from '../utils/documentUtils';
 import styles from './SearchResults.module.css';
 
 /**
@@ -265,16 +265,21 @@ export function SearchResults() {
               const documentUrl = derivedData?.link || result.url;
               const docId = result.id;
 
-              // Use display_title from backend if available, otherwise fall back to extraction
+              // Extract metadata from content (frontend-side extraction)
+              const extractiveSegments = derivedData?.extractive_segments;
+              const contentMetadata = extractMetadataFromContent(extractiveSegments, rawTitle);
+
+              // Use display_title from backend if available, then frontend extraction, then fallback
               const displayTitle = derivedData?.display_title
                 || enrichedMetadata?.display_title
+                || contentMetadata.displayTitle
                 || extractDocumentName(documentUrl, rawTitle);
 
-              // Get enriched metadata fields
-              const documentType = enrichedMetadata?.document_type || result.metadata?.document_type;
-              const docketNumber = enrichedMetadata?.docket_number || result.metadata?.docket_number;
-              const exhibitId = enrichedMetadata?.exhibit_id;
-              const court = enrichedMetadata?.court;
+              // Get enriched metadata fields (backend first, then frontend extraction)
+              const documentType = enrichedMetadata?.document_type || contentMetadata.documentType;
+              const docketNumber = enrichedMetadata?.docket_number || contentMetadata.docketNumber;
+              const exhibitId = enrichedMetadata?.exhibit_id || contentMetadata.exhibitId;
+              const court = enrichedMetadata?.court || contentMetadata.court;
               const filingDate = enrichedMetadata?.filing_date || result.metadata?.filed_date;
 
               // Combine and clean snippets for better context
