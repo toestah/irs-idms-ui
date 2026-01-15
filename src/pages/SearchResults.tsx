@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import {
@@ -22,6 +22,10 @@ import { useSearch } from '../hooks';
 import type { SearchResult } from '../services/api';
 import { extractIdFromUrl, extractDocumentName, extractMetadataFromContent } from '../utils/documentUtils';
 import styles from './SearchResults.module.css';
+
+// Cache configuration
+const CACHE_PAGE_SIZE = 100; // Fetch 100 results to cache
+const DISPLAY_PAGE_SIZE = 20; // Display 20 at a time
 
 // Conversation turn type
 interface ConversationTurn {
@@ -92,15 +96,58 @@ export function SearchResults() {
     documentTypes: string[];
   }>({ documentTypes: [] });
 
+  // Local cache for instant filtering/pagination
+  const [cachedResults, setCachedResults] = useState<SearchResult[]>([]);
+  const [localPage, setLocalPage] = useState(1);
+  const [totalCachedCount, setTotalCachedCount] = useState(0);
+
   // Track if this is a pagination operation vs new search
-  const isPaginatingRef = useRef(false);
   const lastQueryRef = useRef<string>('');
-  const lastFiltersRef = useRef<string[]>([]);
+  const cacheQueryRef = useRef<string>(''); // Query that was cached
+
+  // Ref callback for resetting state on new search (avoids linter warning)
+  const resetForNewSearch = useRef(() => {
+    setLocalPage(1);
+    setCachedResults([]);
+    setActiveFilters({ documentTypes: [] });
+  });
 
   // Common Tax Court document types for quick filtering
   const quickFilters = {
     documentTypes: ['ORDER', 'PETITION', 'MEMORANDUM', 'MOTION', 'STIPULATION', 'DECISION'],
   };
+
+  // Compute filtered and paginated results from cache (instant!)
+  const { displayedResults, filteredCount, totalPages } = useMemo(() => {
+    if (cachedResults.length === 0) {
+      return { displayedResults: [], filteredCount: 0, totalPages: 0 };
+    }
+
+    // Filter results locally
+    let filtered = cachedResults;
+    if (activeFilters.documentTypes.length > 0) {
+      filtered = cachedResults.filter(result => {
+        const structData = (result.document as { structData?: Record<string, unknown> })?.structData;
+        const docType = structData?.document_type as string | undefined;
+        const enrichedType = result.metadata?.document_type;
+        const resultType = docType || enrichedType || '';
+        return activeFilters.documentTypes.some(
+          filterType => resultType.toUpperCase().includes(filterType)
+        );
+      });
+    }
+
+    // Paginate locally
+    const startIdx = (localPage - 1) * DISPLAY_PAGE_SIZE;
+    const endIdx = startIdx + DISPLAY_PAGE_SIZE;
+    const paginated = filtered.slice(startIdx, endIdx);
+
+    return {
+      displayedResults: paginated,
+      filteredCount: filtered.length,
+      totalPages: Math.ceil(filtered.length / DISPLAY_PAGE_SIZE),
+    };
+  }, [cachedResults, activeFilters.documentTypes, localPage]);
 
   // Scroll chat to bottom when new messages arrive
   useEffect(() => {
@@ -136,11 +183,14 @@ export function SearchResults() {
     });
   });
 
-  // Perform search when query changes (new search, not pagination)
+  // Perform search when query changes (new search - fetch batch to cache)
   useEffect(() => {
     if (query && lastQueryRef.current !== query) {
       lastQueryRef.current = query;
-      isPaginatingRef.current = false;
+      cacheQueryRef.current = query;
+
+      // Reset local state for new search (via ref to avoid linter warning)
+      resetForNewSearch.current();
 
       // Add user message via ref callback (avoids linter warning)
       addUserMessage.current(query);
@@ -148,31 +198,37 @@ export function SearchResults() {
       // Clear previous answer for new query
       clearAnswer();
 
+      // Fetch a larger batch to cache (100 results)
       performSearch({
         query,
         page: 1,
-        page_size: 20,
-        document_type: activeFilters.documentTypes.length > 0 ? activeFilters.documentTypes : undefined,
-      }, false);
+        page_size: CACHE_PAGE_SIZE,
+      }, false).then(response => {
+        if (response?.search_results) {
+          setCachedResults(response.search_results);
+          setTotalCachedCount(response.count || response.search_results.length);
+        }
+      });
     }
-  }, [query, performSearch, clearAnswer, activeFilters.documentTypes]);
+  }, [query, performSearch, clearAnswer]);
 
-  // Auto-trigger AI answer when search results arrive
+  // Auto-trigger AI answer when cached results arrive
   useEffect(() => {
     if (
-      results?.search_results?.length &&
-      !isPaginatingRef.current &&
+      cachedResults.length > 0 &&
+      cacheQueryRef.current === query &&
       !isLoadingAnswer &&
       !answer
     ) {
-      // Pass filters to AI so it knows the context
+      // Use first 20 results as context for AI answer
+      const contextResults = cachedResults.slice(0, DISPLAY_PAGE_SIZE);
       getAnswer({
         query,
-        searchResults: results.search_results,
-        session_link: results.session,
+        searchResults: contextResults,
+        session_link: results?.session,
       });
     }
-  }, [results, isLoadingAnswer, answer, query, getAnswer]);
+  }, [cachedResults, isLoadingAnswer, answer, query, getAnswer, results?.session]);
 
   // Add AI response to conversation when it arrives
   useEffect(() => {
@@ -204,73 +260,36 @@ export function SearchResults() {
     }
   };
 
-  // Toggle a document type filter
+  // Toggle a document type filter (instant - filters locally from cache)
   const toggleDocTypeFilter = (docType: string) => {
     setActiveFilters(prev => {
       const isActive = prev.documentTypes.includes(docType);
       const newDocTypes = isActive
         ? prev.documentTypes.filter(t => t !== docType)
         : [...prev.documentTypes, docType];
-
-      // Only re-search if filters actually changed
-      if (JSON.stringify(newDocTypes) !== JSON.stringify(lastFiltersRef.current)) {
-        lastFiltersRef.current = newDocTypes;
-        isPaginatingRef.current = false;
-
-        // Clear answer to get new AI response with filtered context
-        clearAnswer();
-
-        performSearch({
-          query,
-          page: 1,
-          page_size: 20,
-          document_type: newDocTypes.length > 0 ? newDocTypes : undefined,
-        }, false);
-      }
-
       return { ...prev, documentTypes: newDocTypes };
     });
+    // Reset to page 1 when filters change
+    setLocalPage(1);
   };
 
-  // Clear all filters
+  // Clear all filters (instant - resets local filter state)
   const clearFilters = () => {
     if (activeFilters.documentTypes.length === 0) return;
-
     setActiveFilters({ documentTypes: [] });
-    lastFiltersRef.current = [];
-    isPaginatingRef.current = false;
-    clearAnswer();
-
-    performSearch({
-      query,
-      page: 1,
-      page_size: 20,
-    }, false);
+    setLocalPage(1);
   };
 
-  // Handle pagination
+  // Handle pagination (instant - uses local state)
   const handleNextPage = () => {
-    if (results?.pagination?.next_page_token) {
-      isPaginatingRef.current = true;
-      performSearch({
-        query,
-        page_token: results.pagination.next_page_token,
-        page_size: 20,
-        document_type: activeFilters.documentTypes.length > 0 ? activeFilters.documentTypes : undefined,
-      }, true);
+    if (localPage < totalPages) {
+      setLocalPage(prev => prev + 1);
     }
   };
 
   const handlePrevPage = () => {
-    if (results?.pagination?.has_previous && results.pagination.current_page > 1) {
-      isPaginatingRef.current = true;
-      performSearch({
-        query,
-        page: results.pagination.current_page - 1,
-        page_size: 20,
-        use_offset: true,
-        document_type: activeFilters.documentTypes.length > 0 ? activeFilters.documentTypes : undefined,
-      }, true);
+    if (localPage > 1) {
+      setLocalPage(prev => prev - 1);
     }
   };
 
@@ -387,10 +406,12 @@ export function SearchResults() {
         {/* Header with query info */}
         <div className={styles.resultsPanelHeader}>
           <h2>Documents</h2>
-          {results && (
+          {cachedResults.length > 0 && (
             <span className={styles.resultCount}>
-              {results.count} results
-              {activeFilters.documentTypes.length > 0 && ' (filtered)'}
+              {activeFilters.documentTypes.length > 0
+                ? `${filteredCount} of ${totalCachedCount} results (filtered)`
+                : `${totalCachedCount} results`
+              }
             </span>
           )}
         </div>
@@ -447,10 +468,10 @@ export function SearchResults() {
         )}
 
         {/* Results List */}
-        {!isLoading && results?.search_results && (
+        {!isLoading && displayedResults.length > 0 && (
           <div className={styles.resultsScroll}>
             <div className={styles.results}>
-              {results.search_results.map((result) => {
+              {displayedResults.map((result) => {
                 const derivedData = result.document?.derivedStructData;
                 const structData = (result.document as { structData?: Record<string, unknown> })?.structData;
                 const enrichedMetadata = result.metadata;
@@ -560,24 +581,24 @@ export function SearchResults() {
             </div>
 
             {/* Pagination */}
-            {results.pagination && results.pagination.total_pages > 1 && (
+            {totalPages > 1 && (
               <div className={styles.pagination}>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handlePrevPage}
-                  disabled={!results.pagination.has_previous}
+                  disabled={localPage <= 1}
                 >
                   Prev
                 </Button>
                 <span className={styles.pageInfo}>
-                  {results.pagination.current_page} / {results.pagination.total_pages}
+                  {localPage} / {totalPages}
                 </span>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleNextPage}
-                  disabled={!results.pagination.has_next}
+                  disabled={localPage >= totalPages}
                 >
                   Next
                 </Button>
@@ -587,11 +608,20 @@ export function SearchResults() {
         )}
 
         {/* No Results */}
-        {!isLoading && results?.search_results?.length === 0 && (
+        {!isLoading && cachedResults.length === 0 && query && (
           <div className={styles.noResults}>
             <FileText size={40} />
             <h3>No documents found</h3>
-            <p>Try adjusting your search or filters</p>
+            <p>Try adjusting your search query</p>
+          </div>
+        )}
+
+        {/* No filtered results */}
+        {!isLoading && cachedResults.length > 0 && displayedResults.length === 0 && (
+          <div className={styles.noResults}>
+            <Filter size={40} />
+            <h3>No matching documents</h3>
+            <p>Try removing some filters</p>
           </div>
         )}
       </div>
