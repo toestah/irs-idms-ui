@@ -4,7 +4,6 @@ import {
   ArrowLeft,
   FileText,
   ChevronRight,
-  // Filter, // Hidden until backend supports /api/filters
   Loader2,
   AlertCircle,
   Sparkles,
@@ -12,6 +11,8 @@ import {
   Calendar,
   User,
   Hash,
+  Scale,
+  Gavel,
 } from 'lucide-react';
 import { Card, Button, Badge } from '../components';
 import { useSearch } from '../hooks';
@@ -258,36 +259,66 @@ export function SearchResults() {
         <>
           <div className={styles.results}>
             {results.search_results.map((result) => {
-              // Extract data from nested structure
+              // Extract data from nested structure - prioritize structData for rich metadata
               const derivedData = result.document?.derivedStructData;
+              const structData = (result.document as { structData?: Record<string, unknown> })?.structData;
               const enrichedMetadata = result.metadata;
               const rawTitle = derivedData?.title || result.title || '';
               const documentUrl = derivedData?.link || result.url;
               const docId = result.id;
 
-              // Extract metadata from content (frontend-side extraction)
+              // Extract metadata from structData (Discovery Engine metadata) - this is the primary source
+              const caseNumber = structData?.case_number as string | undefined;
+              const caseType = structData?.case_type as string | undefined;
+              const courtName = structData?.court_name as string | undefined;
+              const docType = structData?.document_type as string | undefined;
+              const filingDateRaw = structData?.filing_date as string | undefined;
+              const judgeName = structData?.judge_name as string | undefined;
+              const judgeTitle = structData?.judge_title as string | undefined;
+              const petitioner = structData?.petitioner_name as string | undefined;
+              const respondent = structData?.respondent_name as string | undefined;
+              const decisionDate = structData?.decision_date as string | undefined;
+
+              // Extract metadata from content as fallback
               const extractiveSegments = derivedData?.extractive_segments;
               const contentMetadata = extractMetadataFromContent(extractiveSegments, rawTitle);
 
-              // Use display_title from backend if available, then frontend extraction, then fallback
-              const displayTitle = derivedData?.display_title
-                || enrichedMetadata?.display_title
-                || contentMetadata.displayTitle
-                || extractDocumentName(documentUrl, rawTitle);
+              // Build display title from case parties if available, otherwise use fallbacks
+              let displayTitle: string;
+              if (petitioner && respondent) {
+                // Format: "Petitioner v. Commissioner" style
+                const shortPetitioner = petitioner.length > 30 ? petitioner.slice(0, 27) + '...' : petitioner;
+                const shortRespondent = respondent.includes('COMMISSIONER') ? 'Commissioner' :
+                  (respondent.length > 20 ? respondent.slice(0, 17) + '...' : respondent);
+                displayTitle = `${shortPetitioner} v. ${shortRespondent}`;
+              } else if (caseNumber && docType) {
+                displayTitle = `${docType} - Case ${caseNumber}`;
+              } else {
+                displayTitle = derivedData?.display_title
+                  || enrichedMetadata?.display_title
+                  || contentMetadata.displayTitle
+                  || extractDocumentName(documentUrl, rawTitle);
+              }
 
-              // Get enriched metadata fields (backend first, then frontend extraction)
-              const documentType = enrichedMetadata?.document_type || contentMetadata.documentType;
-              const docketNumber = enrichedMetadata?.docket_number || contentMetadata.docketNumber;
-              const exhibitId = enrichedMetadata?.exhibit_id || contentMetadata.exhibitId;
-              const court = enrichedMetadata?.court || contentMetadata.court;
-              const filingDate = enrichedMetadata?.filing_date || result.metadata?.filed_date;
+              // Get enriched metadata fields (structData first, then backend, then frontend extraction)
+              const documentType = docType || enrichedMetadata?.document_type || contentMetadata.documentType;
+              const docketNumber = caseNumber || enrichedMetadata?.docket_number || contentMetadata.docketNumber;
+              const court = courtName || enrichedMetadata?.court || contentMetadata.court;
+              const filingDate = filingDateRaw || enrichedMetadata?.filing_date || result.metadata?.filed_date;
 
-              // Combine and clean snippets for better context
-              const snippets = derivedData?.snippets || [];
-              const rawSnippet = snippets.length > 0
-                ? snippets.slice(0, 3).join(' ... ')
-                : result.snippet || '';
-              const cleanedSnippet = cleanSnippet(rawSnippet);
+              // Build snippet from extractive segments or use existing
+              const extractiveContent = derivedData?.extractive_segments;
+              let snippetText = '';
+              if (extractiveContent && Array.isArray(extractiveContent) && extractiveContent.length > 0) {
+                const firstSegment = extractiveContent[0]?.content || '';
+                snippetText = cleanSnippet(firstSegment.slice(0, 300));
+              } else {
+                const snippets = derivedData?.snippets || [];
+                const rawSnippet = snippets.length > 0
+                  ? snippets.slice(0, 3).join(' ... ')
+                  : result.snippet || '';
+                snippetText = cleanSnippet(rawSnippet);
+              }
 
               return (
                 <Card
@@ -303,40 +334,51 @@ export function SearchResults() {
                           {documentType.length > 30 ? documentType.slice(0, 27) + '...' : documentType}
                         </Badge>
                       )}
+                      {caseType && caseType !== documentType && (
+                        <Badge variant="default">
+                          {caseType}
+                        </Badge>
+                      )}
                     </div>
                     <ChevronRight size={20} className={styles.chevron} />
                   </div>
 
                   {/* Enriched metadata row */}
                   <div className={styles.resultMetaRow}>
-                    {exhibitId && (
-                      <span className={styles.metaItem}>
-                        <Hash size={14} />
-                        <span>Exhibit {exhibitId}</span>
-                      </span>
-                    )}
                     {docketNumber && (
                       <span className={styles.metaItem}>
-                        <FileText size={14} />
-                        <span>Docket: {docketNumber}</span>
+                        <Hash size={14} />
+                        <span>Case {docketNumber}</span>
                       </span>
                     )}
                     {filingDate && (
                       <span className={styles.metaItem}>
                         <Calendar size={14} />
-                        <span>{filingDate}</span>
+                        <span>Filed: {filingDate}</span>
+                      </span>
+                    )}
+                    {decisionDate && decisionDate !== filingDate && (
+                      <span className={styles.metaItem}>
+                        <Scale size={14} />
+                        <span>Decision: {decisionDate}</span>
+                      </span>
+                    )}
+                    {judgeName && (
+                      <span className={styles.metaItem}>
+                        <Gavel size={14} />
+                        <span>{judgeTitle ? `${judgeTitle} ` : ''}{judgeName}</span>
                       </span>
                     )}
                     {court && (
                       <span className={styles.metaItem}>
                         <User size={14} />
-                        <span>{court.length > 40 ? court.slice(0, 37) + '...' : court}</span>
+                        <span>{court.length > 35 ? court.slice(0, 32) + '...' : court}</span>
                       </span>
                     )}
                   </div>
 
-                  {cleanedSnippet && (
-                    <p className={styles.snippet}>{cleanedSnippet}</p>
+                  {snippetText && (
+                    <p className={styles.snippet}>{snippetText}</p>
                   )}
 
                   <div className={styles.resultActions}>
