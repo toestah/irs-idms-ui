@@ -1,5 +1,6 @@
-import { Search, User } from 'lucide-react';
+import { User } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
+import { SearchInput } from './TextInput';
 import styles from './Header.module.css';
 import irsLogo from '../assets/IRS_Logo.svg';
 
@@ -32,15 +33,13 @@ export function Header({ onSearch }: HeaderProps) {
       </Link>
 
       <form className={styles.searchForm} onSubmit={handleSearch}>
-        <input
-          type="text"
+        <SearchInput
           name="search"
           placeholder="Search cases, documents, or ask a question..."
           className={styles.searchInput}
+          inputClassName={styles.customInput}
+          aria-label="Search"
         />
-        <button type="submit" className={styles.searchButton}>
-          <Search size={16} />
-        </button>
       </form>
 
       <div className={styles.userSection}>
