@@ -26,10 +26,11 @@ interface UseSearchState {
 }
 
 interface UseSearchActions {
-  performSearch: (params: SearchRequest) => Promise<SearchResponse | null>;
+  performSearch: (params: SearchRequest, isPagination?: boolean) => Promise<SearchResponse | null>;
   loadFilters: () => Promise<FiltersResponse | null>;
   getAnswer: (params: AnswerRequest) => Promise<AnswerResponse | null>;
   clearResults: () => void;
+  clearAnswer: () => void;
   clearError: () => void;
 }
 
@@ -41,9 +42,14 @@ export function useSearch(): UseSearchState & UseSearchActions {
   const [isLoadingAnswer, setIsLoadingAnswer] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const performSearch = useCallback(async (params: SearchRequest): Promise<SearchResponse | null> => {
+  const performSearch = useCallback(async (params: SearchRequest, isPagination = false): Promise<SearchResponse | null> => {
     setIsLoading(true);
     setError(null);
+
+    // Only clear answer on new searches, not pagination
+    if (!isPagination) {
+      setAnswer(null);
+    }
 
     try {
       const response = await search(params);
@@ -98,6 +104,10 @@ export function useSearch(): UseSearchState & UseSearchActions {
     setAnswer(null);
   }, []);
 
+  const clearAnswer = useCallback(() => {
+    setAnswer(null);
+  }, []);
+
   const clearError = useCallback(() => {
     setError(null);
   }, []);
@@ -113,6 +123,7 @@ export function useSearch(): UseSearchState & UseSearchActions {
     loadFilters,
     getAnswer,
     clearResults,
+    clearAnswer,
     clearError,
   };
 }

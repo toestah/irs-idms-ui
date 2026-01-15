@@ -12,6 +12,8 @@ import {
   Hash,
   Scale,
   Gavel,
+  Filter,
+  X,
 } from 'lucide-react';
 import { Card, Button, Badge } from '../components';
 import { useSearch } from '../hooks';
@@ -72,10 +74,19 @@ export function SearchResults() {
 
   // Local state
   const [followUpQuestion, setFollowUpQuestion] = useState('');
+  const [activeFilters, setActiveFilters] = useState<{
+    documentTypes: string[];
+    judges: string[];
+  }>({ documentTypes: [], judges: [] });
 
-  // Use ref to track auto-trigger to avoid cascading renders from setState in useEffect
-  const hasAutoTriggeredAnswerRef = useRef(false);
+  // Track if this is a pagination operation vs new search
+  const isPaginatingRef = useRef(false);
   const lastQueryRef = useRef<string>('');
+
+  // Common Tax Court document types for quick filtering
+  const quickFilters = {
+    documentTypes: ['ORDER', 'PETITION', 'MEMORANDUM', 'MOTION', 'STIPULATION', 'DECISION'],
+  };
 
   // Note: /api/filters endpoint not yet available on backend
   // Filters will be enabled once backend supports this endpoint
@@ -83,26 +94,31 @@ export function SearchResults() {
   //   loadFilters();
   // }, [loadFilters]);
 
-  // Perform search when query changes
+  // Perform search when query changes (new search, not pagination)
   useEffect(() => {
-    if (query) {
-      // Reset auto-trigger flag when query changes
-      if (lastQueryRef.current !== query) {
-        hasAutoTriggeredAnswerRef.current = false;
-        lastQueryRef.current = query;
-      }
+    if (query && lastQueryRef.current !== query) {
+      lastQueryRef.current = query;
+      isPaginatingRef.current = false;
       performSearch({
         query,
         page: 1,
         page_size: 20,
-      });
+      }, false); // Not pagination
     }
   }, [query, performSearch]);
 
-  // Auto-trigger AI answer when search results arrive (the hero experience!)
+  // Auto-trigger AI answer when search results arrive for NEW searches only
   useEffect(() => {
-    if (results?.search_results?.length && !hasAutoTriggeredAnswerRef.current && !isLoadingAnswer && !answer) {
-      hasAutoTriggeredAnswerRef.current = true;
+    // Only auto-trigger if:
+    // 1. We have results
+    // 2. This is NOT a pagination operation
+    // 3. We don't already have an answer loading or loaded
+    if (
+      results?.search_results?.length &&
+      !isPaginatingRef.current &&
+      !isLoadingAnswer &&
+      !answer
+    ) {
       getAnswer({
         query,
         searchResults: results.search_results,
@@ -137,25 +153,59 @@ export function SearchResults() {
 
 
 
-  // Handle pagination
+  // Toggle a document type filter
+  const toggleDocTypeFilter = (docType: string) => {
+    setActiveFilters(prev => {
+      const isActive = prev.documentTypes.includes(docType);
+      const newDocTypes = isActive
+        ? prev.documentTypes.filter(t => t !== docType)
+        : [...prev.documentTypes, docType];
+
+      // Trigger a new search with the filter
+      isPaginatingRef.current = false;
+      performSearch({
+        query,
+        page: 1,
+        page_size: 20,
+        document_type: newDocTypes.length > 0 ? newDocTypes : undefined,
+      }, false);
+
+      return { ...prev, documentTypes: newDocTypes };
+    });
+  };
+
+  // Clear all filters
+  const clearFilters = () => {
+    setActiveFilters({ documentTypes: [], judges: [] });
+    isPaginatingRef.current = false;
+    performSearch({
+      query,
+      page: 1,
+      page_size: 20,
+    }, false);
+  };
+
+  // Handle pagination - preserve AI answer
   const handleNextPage = () => {
     if (results?.pagination?.next_page_token) {
+      isPaginatingRef.current = true;
       performSearch({
         query,
         page_token: results.pagination.next_page_token,
         page_size: 20,
-      });
+      }, true); // This is pagination
     }
   };
 
   const handlePrevPage = () => {
     if (results?.pagination?.has_previous && results.pagination.current_page > 1) {
+      isPaginatingRef.current = true;
       performSearch({
         query,
         page: results.pagination.current_page - 1,
         page_size: 20,
         use_offset: true,
-      });
+      }, true); // This is pagination
     }
   };
 
@@ -175,6 +225,34 @@ export function SearchResults() {
             </p>
           </div>
         </div>
+      </div>
+
+      {/* Quick Filters Bar */}
+      <div className={styles.filterBar}>
+        <div className={styles.filterLabel}>
+          <Filter size={16} />
+          <span>Filter by type:</span>
+        </div>
+        <div className={styles.filterChips}>
+          {quickFilters.documentTypes.map((docType) => {
+            const isActive = activeFilters.documentTypes.includes(docType);
+            return (
+              <button
+                key={docType}
+                className={`${styles.filterChip} ${isActive ? styles.filterChipActive : ''}`}
+                onClick={() => toggleDocTypeFilter(docType)}
+              >
+                {docType}
+              </button>
+            );
+          })}
+        </div>
+        {activeFilters.documentTypes.length > 0 && (
+          <button className={styles.clearFilters} onClick={clearFilters}>
+            <X size={14} />
+            Clear
+          </button>
+        )}
       </div>
 
       {/* Error Display */}
