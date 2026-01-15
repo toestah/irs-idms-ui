@@ -20,6 +20,7 @@ import {
 import { Card, Button, Badge } from '../components';
 import { useSearch } from '../hooks';
 import type { SearchResult } from '../services/api';
+import { getSignedUrl } from '../services/api/documents';
 import { extractIdFromUrl, extractDocumentName, extractMetadataFromContent } from '../utils/documentUtils';
 import styles from './SearchResults.module.css';
 
@@ -298,6 +299,22 @@ export function SearchResults() {
     setSearchParams({ q: question });
   };
 
+  // Handle document view - convert GCS URLs to signed URLs
+  const handleViewDocument = async (url: string) => {
+    if (url.startsWith('gs://')) {
+      try {
+        const response = await getSignedUrl(url);
+        window.open(response.signed_url, '_blank');
+      } catch (err) {
+        console.error('Failed to get signed URL:', err);
+        // Fallback: try opening directly (may not work)
+        window.open(url, '_blank');
+      }
+    } else {
+      window.open(url, '_blank');
+    }
+  };
+
   return (
     <div className={styles.splitLayout}>
       {/* Left Panel: AI Conversation */}
@@ -557,7 +574,7 @@ export function SearchResults() {
                           className={styles.viewDocBtn}
                           onClick={(e) => {
                             e.stopPropagation();
-                            window.open(documentUrl, '_blank');
+                            handleViewDocument(documentUrl);
                           }}
                         >
                           <FileText size={14} />
