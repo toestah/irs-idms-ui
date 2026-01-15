@@ -278,7 +278,7 @@ export interface DocumentQueueResponse {
 // ============================================
 
 export interface SignedUrlRequest {
-  gcs_url: string;
+  document_id: string;
 }
 
 export interface SignedUrlResponse {

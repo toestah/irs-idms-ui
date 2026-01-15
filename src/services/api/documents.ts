@@ -7,7 +7,6 @@ import { apiClient } from './client';
 import type {
   DocChatRequest,
   DocChatResponse,
-  SignedUrlRequest,
   SignedUrlResponse,
   DocumentQueueResponse,
   DocumentForVerification,
@@ -49,10 +48,10 @@ export async function uploadDocumentForChat(
 
 /**
  * Generate a signed URL for accessing a GCS document
+ * @param documentId - The document ID (filename without extension)
  */
-export async function getSignedUrl(gcsUrl: string): Promise<SignedUrlResponse> {
-  const request: SignedUrlRequest = { gcs_url: gcsUrl };
-  return apiClient.post<SignedUrlResponse>('/api/generate_signed_url', request);
+export async function getSignedUrl(documentId: string): Promise<SignedUrlResponse> {
+  return apiClient.post<SignedUrlResponse>('/api/generate_signed_url', { document_id: documentId });
 }
 
 /**

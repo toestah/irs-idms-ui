@@ -303,8 +303,17 @@ export function SearchResults() {
   const handleViewDocument = async (url: string) => {
     if (url.startsWith('gs://')) {
       try {
-        const response = await getSignedUrl(url);
-        window.open(response.signed_url, '_blank');
+        // Extract document ID from GCS URL
+        // Expected format: gs://bucket/docket-documents/12345678.pdf or similar
+        const match = url.match(/\/([^/]+)\.pdf$/i);
+        if (match) {
+          const documentId = match[1];
+          const response = await getSignedUrl(documentId);
+          window.open(response.signed_url, '_blank');
+        } else {
+          console.error('Could not extract document ID from URL:', url);
+          window.open(url, '_blank');
+        }
       } catch (err) {
         console.error('Failed to get signed URL:', err);
         // Fallback: try opening directly (may not work)
