@@ -176,11 +176,84 @@
   font-size: 15px;
 }
 
-.answerContent p {
-  line-height: 1.8;
+/* Markdown Content Styles */
+.markdownContent {
+  line-height: 1.7;
   color: var(--color-text-primary);
-  margin-bottom: var(--spacing-lg);
   font-size: 15px;
+}
+
+.markdownContent p {
+  margin-bottom: var(--spacing-md);
+}
+
+.markdownContent h1,
+.markdownContent h2,
+.markdownContent h3,
+.markdownContent h4 {
+  color: var(--color-primary-dark);
+  margin-top: var(--spacing-lg);
+  margin-bottom: var(--spacing-sm);
+  font-weight: 600;
+}
+
+.markdownContent h1 { font-size: 20px; }
+.markdownContent h2 { font-size: 18px; }
+.markdownContent h3 { font-size: 16px; }
+.markdownContent h4 { font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+.markdownContent ul,
+.markdownContent ol {
+  margin: var(--spacing-sm) 0 var(--spacing-md) var(--spacing-lg);
+  padding-left: var(--spacing-md);
+}
+
+.markdownContent li {
+  margin-bottom: var(--spacing-xs);
+}
+
+.markdownContent li::marker {
+  color: var(--color-primary-dark);
+}
+
+.markdownContent strong {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.markdownContent em {
+  font-style: italic;
+}
+
+.markdownContent code {
+  background-color: var(--color-bg-secondary);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  font-family: monospace;
+  font-size: 13px;
+}
+
+.markdownContent blockquote {
+  border-left: 3px solid var(--color-primary-light);
+  padding-left: var(--spacing-md);
+  margin: var(--spacing-md) 0;
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+.markdownContent a {
+  color: var(--color-primary-dark);
+  text-decoration: none;
+}
+
+.markdownContent a:hover {
+  text-decoration: underline;
+}
+
+.markdownContent hr {
+  border: none;
+  border-top: 1px solid var(--color-border-light);
+  margin: var(--spacing-lg) 0;
 }
 
 .answerSources {

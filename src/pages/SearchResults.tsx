@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
 import {
   ArrowLeft,
   FileText,
@@ -284,7 +285,9 @@ export function SearchResults() {
             </div>
           ) : answer ? (
             <div className={styles.answerContent}>
-              <p>{answer.answer}</p>
+              <div className={styles.markdownContent}>
+                <ReactMarkdown>{answer.answer}</ReactMarkdown>
+              </div>
               {answer.sources?.length > 0 && (
                 <div className={styles.answerSources}>
                   <h4>Sources</h4>
