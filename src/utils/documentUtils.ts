@@ -142,12 +142,12 @@ export function extractMetadataFromContent(
 
   // Extract case name
   const caseMatch = combinedText.match(
-    /([A-Z][A-Za-z\s,\.&]+(?:LLC|Inc|Corp|L\.P\.)?\.?)\s+v\.\s+([A-Z][A-Za-z\s,\.&]+)/
+    /([A-Z][A-Za-z\s,.&]+(?:LLC|Inc|Corp|L\.P\.)?\.?)\s+v\.\s+([A-Z][A-Za-z\s,.&]+)/
   );
   if (caseMatch) {
     metadata.caseName = caseMatch[0].slice(0, 60).trim();
   } else {
-    const inReMatch = combinedText.match(/In\s+[Rr]e[:\s]+([A-Z][A-Za-z\s,\.&]+)/);
+    const inReMatch = combinedText.match(/In\s+[Rr]e[:\s]+([A-Z][A-Za-z\s,.&]+)/);
     if (inReMatch) {
       metadata.caseName = `In re: ${inReMatch[1].slice(0, 50).trim()}`;
     }
