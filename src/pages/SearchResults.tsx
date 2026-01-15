@@ -13,7 +13,7 @@ import {
   User,
   Hash,
 } from 'lucide-react';
-import { Card, Button, Badge } from '../components';
+import { Card, Button, Badge, Pagination, EmptyState } from '../components';
 import { useSearch } from '../hooks';
 import type { SearchResult } from '../services/api';
 import { extractIdFromUrl, extractDocumentName } from '../utils/documentUtils';
@@ -131,16 +131,7 @@ export function SearchResults() {
     }
   };
 
-  const handlePrevPage = () => {
-    if (results?.pagination?.has_previous && results.pagination.current_page > 1) {
-      performSearch({
-        query,
-        page: results.pagination.current_page - 1,
-        page_size: 20,
-        use_offset: true,
-      });
-    }
-  };
+
 
   return (
     <div className={styles.page}>
@@ -359,40 +350,39 @@ export function SearchResults() {
 
           {/* Pagination */}
           {results.pagination && (
-            <div className={styles.pagination}>
-              <Button
-                variant="outline"
-                onClick={handlePrevPage}
-                disabled={!results.pagination.has_previous}
-              >
-                Previous
-              </Button>
-              <span className={styles.pageInfo}>
-                Page {results.pagination.current_page} of{' '}
-                {results.pagination.total_pages}
-              </span>
-              <Button
-                variant="outline"
-                onClick={handleNextPage}
-                disabled={!results.pagination.has_next}
-              >
-                Next
-              </Button>
-            </div>
+            <Pagination
+              currentPage={results.pagination.current_page}
+              totalPages={results.pagination.total_pages}
+              onPageChange={(page) => {
+                if (page > results.pagination.current_page && results.pagination.next_page_token) {
+                  handleNextPage();
+                } else {
+                  performSearch({
+                    query,
+                    page,
+                    page_size: 20,
+                    use_offset: true,
+                  });
+                }
+              }}
+            />
           )}
         </>
       )}
 
       {/* No Results */}
       {!isLoading && results?.search_results?.length === 0 && (
-        <Card className={styles.noResults} padding="lg">
-          <FileText size={48} className={styles.noResultsIcon} />
-          <h3>No documents found</h3>
-          <p>Try adjusting your search query or filters</p>
-          <Button variant="primary" onClick={() => navigate('/')}>
-            New Search
-          </Button>
-        </Card>
+        <EmptyState
+          icon={<FileText />}
+          title="No documents found"
+          description="Try adjusting your search query or filters"
+          action={{
+            label: "New Search",
+            onClick: () => navigate('/'),
+            variant: "primary"
+          }}
+          className={styles.noResults}
+        />
       )}
     </div>
   );

@@ -45,18 +45,21 @@ interface TableCellProps {
   header?: boolean;
   align?: 'left' | 'center' | 'right';
   className?: string;
+  colSpan?: number;
 }
 
 export function TableCell({
   children,
   header = false,
   align = 'left',
-  className = ''
+  className = '',
+  colSpan,
 }: TableCellProps) {
   const Component = header ? 'th' : 'td';
   return (
     <Component
       className={`${styles.tableCell} ${styles[`align-${align}`]} ${className}`}
+      colSpan={colSpan}
     >
       {children}
     </Component>

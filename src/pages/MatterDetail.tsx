@@ -16,7 +16,7 @@ import {
   AlertCircle,
   ExternalLink,
 } from 'lucide-react';
-import { Card, Button, Badge, SearchInput } from '../components';
+import { Card, Button, Badge, SearchInput, EmptyState } from '../components';
 import { useCase } from '../hooks';
 import { getSignedUrl } from '../services/api';
 import type { DocketEntry } from '../services/api';
@@ -357,14 +357,17 @@ export function MatterDetail() {
 
       {/* Empty State - No case data and not loading */}
       {!isLoading && !caseData && !error && (
-        <Card className={styles.emptyState} padding="lg">
-          <FileText size={48} className={styles.emptyIcon} />
-          <h3>Case Not Found</h3>
-          <p>The requested case could not be found.</p>
-          <Button variant="primary" onClick={() => navigate('/')}>
-            Back to Search
-          </Button>
-        </Card>
+        <EmptyState
+          icon={<FileText />}
+          title="Case Not Found"
+          description="The requested case could not be found."
+          action={{
+            label: "Back to Search",
+            onClick: () => navigate('/'),
+            variant: "primary"
+          }}
+          className={styles.emptyState}
+        />
       )}
     </div>
   );
