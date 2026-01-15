@@ -20,7 +20,6 @@ import {
 import { Card, Button, Badge } from '../components';
 import { useSearch } from '../hooks';
 import type { SearchResult } from '../services/api';
-import { getSignedUrl } from '../services/api/documents';
 import { extractIdFromUrl, extractDocumentName, extractMetadataFromContent } from '../utils/documentUtils';
 import styles from './SearchResults.module.css';
 
@@ -299,40 +298,11 @@ export function SearchResults() {
     setSearchParams({ q: question });
   };
 
-  // Handle document view - convert GCS URLs to signed URLs
-  const handleViewDocument = async (url: string) => {
-    // GCS URLs need to be converted to signed URLs
-    if (url.startsWith('gs://')) {
-      try {
-        // Extract document ID from GCS URL
-        // Handles: gs://bucket/path/filename.pdf, gs://bucket/docket-documents/12345678.pdf
-        const match = url.match(/\/([^/]+)\.pdf$/i);
-        if (match) {
-          const documentId = match[1];
-          const response = await getSignedUrl(documentId);
-          window.open(response.signed_url, '_blank');
-        } else {
-          // Try extracting any filename (not just .pdf)
-          const anyFileMatch = url.match(/\/([^/]+)$/);
-          if (anyFileMatch) {
-            const documentId = anyFileMatch[1].replace(/\.[^.]+$/, ''); // Remove extension
-            const response = await getSignedUrl(documentId);
-            window.open(response.signed_url, '_blank');
-          } else {
-            console.error('Could not extract document ID from GCS URL:', url);
-            alert('Unable to open document: invalid GCS URL format');
-          }
-        }
-      } catch (err) {
-        console.error('Failed to get signed URL:', err);
-        alert('Unable to open document. Please try again later.');
-      }
-    } else if (url.startsWith('http://') || url.startsWith('https://')) {
-      // Regular HTTP(S) URLs can be opened directly
+  // Handle document view - open document URL
+  // Note: The backend already provides pre-signed URLs in search results
+  const handleViewDocument = (url: string) => {
+    if (url) {
       window.open(url, '_blank');
-    } else {
-      console.error('Unknown URL format:', url);
-      alert('Unable to open document: unsupported URL format');
     }
   };
 
