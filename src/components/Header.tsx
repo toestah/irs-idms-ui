@@ -1,6 +1,5 @@
-import { User } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
-import { SearchInput } from './TextInput';
+import { SearchInput, UserDropdown } from '../components';
 import styles from './Header.module.css';
 import irsLogo from '../assets/IRS_Logo.svg';
 
@@ -42,16 +41,11 @@ export function Header({ onSearch }: HeaderProps) {
         />
       </form>
 
-      <div className={styles.userSection}>
-        <div className={styles.userAvatar}>
-          <User size={20} />
-        </div>
-        <div className={styles.userInfo}>
-          <span className={styles.userName}>John Smith</span>
-          <span className={styles.userRole}>Attorney</span>
-        </div>
-        <div className={styles.notificationBadge}>3</div>
-      </div>
+      <UserDropdown
+        userName="John Smith"
+        userRole="Attorney"
+        notificationCount={3}
+      />
     </header>
   );
 }

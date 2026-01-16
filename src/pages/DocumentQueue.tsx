@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Upload, Download, Filter, FileText } from 'lucide-react';
+import { Upload, Download, Filter, FileText, CheckCircle } from 'lucide-react';
 import {
   Card,
   Button,
@@ -9,74 +9,70 @@ import {
   TableBody,
   TableRow,
   TableCell,
-  ConfidenceBadge,
+  StatusBadge,
+  Tabs,
+  Pagination,
+  type Tab
 } from '../components';
 import styles from './DocumentQueue.module.css';
 
 interface Document {
   id: string;
   name: string;
-  petitioner: string;
-  orderDate: string;
-  uploadDate: string;
+  caseId: string;
+  type: string;
+  dateAdded: string;
   status: 'pending' | 'verified';
-  confidence: number;
 }
 
 const mockDocuments: Document[] = [
   {
     id: '1',
     name: 'Statement of Taxpayer Identification',
-    petitioner: 'John A. Smith & Mary B. Smith',
-    orderDate: 'Nov 14, 2024',
-    uploadDate: 'Dec 14, 2024',
+    caseId: '12345-24',
+    type: 'STI',
+    dateAdded: 'Dec 14, 2024',
     status: 'pending',
-    confidence: 89,
   },
   {
     id: '2',
     name: 'Order - Motion to Dismiss',
-    petitioner: 'Johnson Corp.',
-    orderDate: 'Nov 30, 2024',
-    uploadDate: 'Dec 14, 2024',
+    caseId: '67890-24',
+    type: 'Order',
+    dateAdded: 'Dec 14, 2024',
     status: 'pending',
-    confidence: 95,
   },
   {
     id: '3',
     name: 'Order - Scheduling Conference',
-    petitioner: 'Thompson Industries',
-    orderDate: 'Dec 7, 2024',
-    uploadDate: 'Dec 14, 2024',
+    caseId: '11223-24',
+    type: 'Order',
+    dateAdded: 'Dec 14, 2024',
     status: 'pending',
-    confidence: 67,
   },
   {
     id: '4',
     name: 'Order - Discovery Extension',
-    petitioner: 'Williams Estate',
-    orderDate: 'Nov 27, 2024',
-    uploadDate: 'Dec 13, 2024',
+    caseId: '44556-24',
+    type: 'Order',
+    dateAdded: 'Dec 13, 2024',
     status: 'pending',
-    confidence: 78,
   },
   {
     id: '5',
     name: 'Order - Summary Judgment',
-    petitioner: 'ABC Holdings LLC',
-    orderDate: 'Dec 4, 2024',
-    uploadDate: 'Dec 13, 2024',
+    caseId: '77889-24',
+    type: 'Order',
+    dateAdded: 'Dec 13, 2024',
     status: 'verified',
-    confidence: 92,
   },
   {
     id: '6',
     name: 'Statement of Taxpayer Identification',
-    petitioner: 'Robert & Linda Martinez',
-    orderDate: 'Nov 19, 2024',
-    uploadDate: 'Dec 12, 2024',
+    caseId: '99001-24',
+    type: 'STI',
+    dateAdded: 'Dec 12, 2024',
     status: 'verified',
-    confidence: 100,
   },
 ];
 
@@ -84,13 +80,30 @@ export function DocumentQueue() {
   const navigate = useNavigate();
   const [filter, setFilter] = useState('');
   const [sortBy, setSortBy] = useState('');
+  const [activeTab, setActiveTab] = useState<'pending' | 'verified'>('pending');
+  const [localPage, setLocalPage] = useState(1);
+  const itemsPerPage = 5;
 
   const pendingCount = mockDocuments.filter((d) => d.status === 'pending').length;
   const verifiedCount = mockDocuments.filter((d) => d.status === 'verified').length;
 
+  const tabs: Tab[] = [
+    { id: 'pending', label: 'Pending Review', icon: <FileText size={16} />, count: pendingCount },
+    { id: 'verified', label: 'Verified', icon: <CheckCircle size={16} />, count: verifiedCount },
+  ];
+
+  const filteredDocs = mockDocuments
+    .filter((d) => d.status === activeTab)
+    .filter((d) => d.name.toLowerCase().includes(filter.toLowerCase()) || d.caseId.includes(filter));
+
+  const totalPages = Math.ceil(filteredDocs.length / itemsPerPage);
+  const currentDocs = filteredDocs.slice((localPage - 1) * itemsPerPage, localPage * itemsPerPage);
+
   const handleViewVerify = (doc: Document) => {
     if (doc.status === 'pending') {
       navigate(`/verification/${doc.id}`);
+    } else {
+      // Logic for viewing verified documents
     }
   };
 
@@ -106,18 +119,12 @@ export function DocumentQueue() {
         </Button>
       </div>
 
-      <div className={styles.statusTabs}>
-        <button className={`${styles.statusTab} ${styles.pendingTab}`}>
-          <FileText size={16} />
-          <span>Pending Review</span>
-          <span className={styles.tabCount}>{pendingCount}</span>
-        </button>
-        <button className={`${styles.statusTab} ${styles.verifiedTab}`}>
-          <FileText size={16} />
-          <span>Verified</span>
-          <span className={styles.tabCount}>{verifiedCount}</span>
-        </button>
-      </div>
+      <Tabs 
+        tabs={tabs}
+        activeTab={activeTab}
+        onTabChange={(id) => setActiveTab(id as 'pending' | 'verified')}
+        className={styles.statusTabs}
+      />
 
       <div className={styles.controls}>
         <div className={styles.filters}>
@@ -128,7 +135,7 @@ export function DocumentQueue() {
               type="text"
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
-              placeholder="Search..."
+              placeholder="Search by name or case ID..."
               className={styles.filterInput}
             />
           </div>
@@ -140,9 +147,8 @@ export function DocumentQueue() {
               className={styles.sortSelect}
             >
               <option value="">Select...</option>
-              <option value="date">Upload Date</option>
-              <option value="confidence">Confidence</option>
-              <option value="status">Status</option>
+              <option value="date">Date Added</option>
+              <option value="caseId">Case ID</option>
             </select>
           </div>
         </div>
@@ -156,36 +162,25 @@ export function DocumentQueue() {
           <TableHeader>
             <TableRow>
               <TableCell header>Document Name</TableCell>
-              <TableCell header>Petitioner</TableCell>
-              <TableCell header>Order Date</TableCell>
-              <TableCell header>Upload Date</TableCell>
+              <TableCell header>Case ID</TableCell>
+              <TableCell header>Type</TableCell>
+              <TableCell header>Added Date</TableCell>
               <TableCell header>Status</TableCell>
-              <TableCell header align="center">Confidence</TableCell>
-              <TableCell header align="center">Action</TableCell>
+              <TableCell header align="center">Actions</TableCell>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {mockDocuments.map((doc) => (
+            {currentDocs.map((doc) => (
               <TableRow key={doc.id}>
-                <TableCell>
-                  <div className={styles.documentName}>
-                    <FileText size={16} className={styles.docIcon} />
-                    <div>
-                      <span className={styles.docTitle}>{doc.name}</span>
-                      <span className={styles.docId}>ID: {doc.id}</span>
-                    </div>
-                  </div>
+                <TableCell className={styles.docNameCell}>
+                  <FileText size={16} className={styles.docIcon} />
+                  <span>{doc.name}</span>
                 </TableCell>
-                <TableCell>{doc.petitioner}</TableCell>
-                <TableCell>{doc.orderDate}</TableCell>
-                <TableCell>{doc.uploadDate}</TableCell>
+                <TableCell>{doc.caseId}</TableCell>
+                <TableCell>{doc.type}</TableCell>
+                <TableCell>{doc.dateAdded}</TableCell>
                 <TableCell>
-                  <span className={`${styles.status} ${styles[doc.status]}`}>
-                    {doc.status === 'pending' ? 'Pending Review' : 'Verified'}
-                  </span>
-                </TableCell>
-                <TableCell align="center">
-                  <ConfidenceBadge value={doc.confidence} />
+                  <StatusBadge status={doc.status} />
                 </TableCell>
                 <TableCell align="center">
                   <button
@@ -201,17 +196,14 @@ export function DocumentQueue() {
         </Table>
       </Card>
 
-      <div className={styles.pagination}>
-        <span className={styles.paginationInfo}>
-          Showing {mockDocuments.length} of {mockDocuments.length} documents
-        </span>
-        <div className={styles.paginationControls}>
-          <button className={styles.paginationButton}>Previous</button>
-          <button className={`${styles.paginationButton} ${styles.active}`}>1</button>
-          <button className={styles.paginationButton}>2</button>
-          <button className={styles.paginationButton}>Next</button>
-        </div>
-      </div>
+      <Pagination
+        currentPage={localPage}
+        totalPages={totalPages}
+        onPageChange={setLocalPage}
+        totalItems={filteredDocs.length}
+        itemsPerPage={itemsPerPage}
+        className={styles.pagination}
+      />
     </div>
   );
 }

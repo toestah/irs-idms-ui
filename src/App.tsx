@@ -6,6 +6,12 @@ import {
   MatterDetail,
   DocumentQueue,
   DocumentVerification,
+  Matters,
+  Documents,
+  Reports,
+  Settings,
+  Help,
+  Account,
 } from './pages';
 import './App.css';
 
@@ -19,13 +25,15 @@ function App() {
           <Route path="matters/:id" element={<MatterDetail />} />
           <Route path="document-queue" element={<DocumentQueue />} />
           <Route path="verification/:id" element={<DocumentVerification />} />
+          <Route path="account" element={<Account />} />
+          
           {/* Placeholder routes for future pages */}
-          <Route path="matters" element={<Dashboard />} />
-          <Route path="documents" element={<Dashboard />} />
+          <Route path="matters" element={<Matters />} />
+          <Route path="documents" element={<Documents />} />
           <Route path="verification" element={<DocumentQueue />} />
-          <Route path="reports" element={<Dashboard />} />
-          <Route path="settings" element={<Dashboard />} />
-          <Route path="help" element={<Dashboard />} />
+          <Route path="reports" element={<Reports />} />
+          <Route path="settings" element={<Settings />} />
+          <Route path="help" element={<Help />} />
         </Route>
       </Routes>
     </BrowserRouter>
