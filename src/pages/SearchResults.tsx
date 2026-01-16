@@ -17,7 +17,7 @@ import {
   Send,
   MessageSquare,
 } from 'lucide-react';
-import { Card, Button, Badge } from '../components';
+import { Card, Button, Badge, Pagination, EmptyState } from '../components';
 import { useSearch } from '../hooks';
 import type { SearchResult } from '../services/api';
 import { extractIdFromUrl, extractDocumentName, extractMetadataFromContent } from '../utils/documentUtils';
@@ -280,18 +280,6 @@ export function SearchResults() {
     setLocalPage(1);
   };
 
-  // Handle pagination (instant - uses local state)
-  const handleNextPage = () => {
-    if (localPage < totalPages) {
-      setLocalPage(prev => prev + 1);
-    }
-  };
-
-  const handlePrevPage = () => {
-    if (localPage > 1) {
-      setLocalPage(prev => prev - 1);
-    }
-  };
 
   // Handle suggested question click
   const handleSuggestedQuestion = (question: string) => {
@@ -589,48 +577,33 @@ export function SearchResults() {
             </div>
 
             {/* Pagination */}
-            {totalPages > 1 && (
-              <div className={styles.pagination}>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handlePrevPage}
-                  disabled={localPage <= 1}
-                >
-                  Prev
-                </Button>
-                <span className={styles.pageInfo}>
-                  {localPage} / {totalPages}
-                </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleNextPage}
-                  disabled={localPage >= totalPages}
-                >
-                  Next
-                </Button>
-              </div>
-            )}
+            <Pagination
+              currentPage={localPage}
+              totalPages={totalPages}
+              onPageChange={setLocalPage}
+              totalItems={filteredCount}
+            />
           </div>
         )}
 
         {/* No Results */}
         {!isLoading && cachedResults.length === 0 && query && (
-          <div className={styles.noResults}>
-            <FileText size={40} />
-            <h3>No documents found</h3>
-            <p>Try adjusting your search query</p>
-          </div>
+          <EmptyState
+            icon={<FileText size={40} />}
+            title="No documents found"
+            description="Try adjusting your search query"
+            className={styles.noResults}
+          />
         )}
 
         {/* No filtered results */}
         {!isLoading && cachedResults.length > 0 && displayedResults.length === 0 && (
-          <div className={styles.noResults}>
-            <Filter size={40} />
-            <h3>No matching documents</h3>
-            <p>Try removing some filters</p>
-          </div>
+          <EmptyState
+            icon={<Filter size={40} />}
+            title="No matching documents"
+            description="Try removing some filters"
+            className={styles.noResults}
+          />
         )}
       </div>
     </div>

@@ -9,11 +9,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
+npm install      # Install dependencies
 npm run dev      # Start dev server at localhost:5173
 npm run build    # TypeScript check + Vite production build
 npm run lint     # ESLint check
 npm run preview  # Preview production build locally
 ```
+
+## Environment Setup
+
+Copy `.env.example` to `.env.local` and configure:
+- `VITE_API_URL` - Main backend API URL (Cloud Run service)
+- `VITE_ADK_URL` - ADK service URL (AI features backend)
+- Feature flags: `VITE_ENABLE_AI_ANSWERS`, `VITE_ENABLE_DOCUMENT_CHAT`, `VITE_ENABLE_SSE_STREAMING`
+- `VITE_DEBUG_MODE` - Enables detailed API logging in browser console
 
 ## Architecture
 
@@ -32,8 +41,11 @@ src/
 │   ├── client.ts          # ApiClient class with auth, error handling
 │   ├── search.ts          # Search API (Vertex AI Search integration)
 │   ├── cases.ts           # Case/matter CRUD operations
-│   ├── documents.ts       # Document operations
-│   └── types.ts           # Shared API types
+│   ├── documents.ts       # Document operations (includes signed URL generation)
+│   ├── auth.ts            # Authentication (login, logout, token management)
+│   ├── sessions.ts        # Search session history
+│   ├── types.ts           # Shared API types
+│   └── index.ts           # Unified API exports
 ├── hooks/                 # Custom React hooks
 │   ├── useSearch.ts       # Search with loading/error states
 │   └── useCase.ts         # Case data fetching
@@ -44,19 +56,28 @@ src/
 
 ### API Integration
 
-Two backend services configured via environment variables:
-- `VITE_API_URL` / `VITE_API_BASE_URL` - Main backend (Cloud Run)
-- `VITE_ADK_URL` / `VITE_ADK_BASE_URL` - ADK service for AI features
+**Dual Backend Architecture:**
+Two separate API client instances communicate with different backend services:
+- `apiClient` - Main backend (Cloud Run) for cases, documents, sessions
+- `adkClient` - ADK service for AI features (search, chat, extractive answers)
+
+Both configured via environment variables:
+- `VITE_API_URL` / `VITE_API_BASE_URL` - Main backend URL
+- `VITE_ADK_URL` / `VITE_ADK_BASE_URL` - ADK service URL
 
 API client (`src/services/api/client.ts`) handles:
 - Bearer token auth from localStorage (`auth_token`)
 - Debug logging when `VITE_DEBUG_MODE=true`
 - Error handling (timeouts are managed by backend)
+- Custom ApiError class with status, endpoint, and details
 
-Feature flags in `src/config/env.ts`:
+**Feature Flags** in `src/config/env.ts`:
 - `VITE_ENABLE_AI_ANSWERS` - AI-generated answer summaries
 - `VITE_ENABLE_DOCUMENT_CHAT` - Document chat feature
 - `VITE_ENABLE_SSE_STREAMING` - Server-sent events for streaming
+
+**Document Handling:**
+Documents stored in GCS (Google Cloud Storage) are accessed via signed URLs. The backend (`/api/documents/{id}/signed-url`) generates time-limited URLs for secure document access. The frontend displays documents using these signed URLs in iframes (PDFs) or img tags (images).
 
 ### Styling
 
@@ -72,10 +93,16 @@ Key colors:
 
 Routes defined in `src/App.tsx`, all wrapped by `MainLayout`:
 - `/` - Dashboard with search
-- `/search?q=` - Search results
-- `/matters/:id` - Matter detail
+- `/search?q=` - Search results with AI-generated summaries
+- `/matters/:id` - Matter detail with docket entries and case info
+- `/matters` - Matters list (placeholder)
+- `/documents` - Documents browser (placeholder)
 - `/document-queue` - Document verification queue
-- `/verification/:id` - HITL document verification
+- `/verification/:id` - HITL document verification (split view with PDF preview)
+- `/verification` - Alias to document-queue
+- `/reports` - Reports dashboard (placeholder)
+- `/settings` - User settings (placeholder)
+- `/help` - Help/documentation (placeholder)
 
 ### Adding New Features
 

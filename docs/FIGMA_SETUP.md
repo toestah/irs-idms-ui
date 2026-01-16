@@ -49,7 +49,7 @@ Once connected, you can ask Claude Code to:
 
 The following accounts have access to the Figma file:
 - taimur@googlecloud.corp-partner.google.com
-- (Add other team member emails here)
+- michael.oconnor@googlecloud.corp-partner.google.com
 
 Each team member runs the `claude mcp add` command and authenticates with their own Figma account.
 
