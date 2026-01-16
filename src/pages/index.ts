@@ -9,3 +9,4 @@ export { Reports } from './Reports';
 export { Settings } from './Settings';
 export { Help } from './Help';
 export { Account } from './Account';
+export { Notifications } from './Notifications';

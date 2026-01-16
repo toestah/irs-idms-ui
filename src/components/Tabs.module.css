@@ -28,20 +28,20 @@
 }
 
 .tab:hover {
-  color: var(--color-primary);
-  background-color: var(--color-primary-lightest);
+  color: var(--color-primary-dark);
+  background-color: var(--color-bg-secondary);
 }
 
 .active {
-  color: var(--color-primary);
-  border-bottom-color: var(--color-primary);
+  color: var(--color-primary-dark);
+  border-bottom-color: var(--color-primary-dark);
 }
 
 .tabCount {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--color-surface-variant);
+  background-color: var(--color-bg-secondary);
   color: var(--color-text-secondary);
   font-size: 11px;
   font-weight: var(--font-weight-bold);
@@ -52,6 +52,6 @@
 }
 
 .active .tabCount {
-  background-color: var(--color-primary);
+  background-color: var(--color-primary-dark);
   color: white;
 }

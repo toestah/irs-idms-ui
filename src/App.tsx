@@ -12,6 +12,7 @@ import {
   Settings,
   Help,
   Account,
+  Notifications,
 } from './pages';
 import './App.css';
 
@@ -26,6 +27,7 @@ function App() {
           <Route path="document-queue" element={<DocumentQueue />} />
           <Route path="verification/:id" element={<DocumentVerification />} />
           <Route path="account" element={<Account />} />
+          <Route path="notifications" element={<Notifications />} />
           
           {/* Placeholder routes for future pages */}
           <Route path="matters" element={<Matters />} />
